@@ -1,0 +1,25 @@
+{
+  "name": "rentarena-rental-system",
+  "version": "1.0.0",
+  "description": "RentArena Property Rental Management System Node.js Backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test:api": "jest tests/api",
+    "test:e2e": "powershell -ExecutionPolicy Bypass -File ./run_selenium.ps1",
+    "test": "npm run test:api && npm run test:e2e"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "odbc": "^2.4.8"
+  },
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "jest": "^30.4.2",
+    "supertest": "^7.2.2"
+  }
+}

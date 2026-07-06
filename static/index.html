@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentArena Property Rental System</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Leaflet.js Map CDNs -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo" id="navLogo">
+                <span class="logo-icon">🔑</span>
+                <span class="logo-text">RentArena</span>
+                <span class="logo-badge">Zero Brokerage</span>
+            </a>
+            
+            <ul class="nav-menu" id="navMenu">
+                <!-- Dynamic navigation links inserted by app.js -->
+            </ul>
+
+            <div class="nav-actions">
+                <button id="navPMLoginBtn" onclick="switchView('viewLogin'); setLoginRole('manager');" class="btn-nav-pm" style="margin-right: 5px;">Property Manager Login</button>
+                <select id="langSelect" class="lang-select">
+                    <option value="en">English (EN)</option>
+                    <option value="fr">Français (FR)</option>
+                    <option value="vi">Tiếng Việt (VI)</option>
+                    <option value="es">Español (ES)</option>
+                </select>
+
+                <button id="themeToggle" class="theme-btn" title="Toggle theme">
+                    <span class="theme-icon">☀️</span>
+                </button>
+
+                <div id="userInfo" class="user-info-chip hidden">
+                    <span class="avatar">👤</span>
+                    <span id="userChipName" class="user-chip-name">User</span>
+                    <button id="logoutBtn" class="logout-btn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-content">
+        <!-- Notification Banner -->
+        <div id="notification" class="notification hidden"></div>
+
+        <!-- ==================== VIEW: HOME PAGE ==================== -->
+        <section id="viewHome" class="view-section active">
+            <div class="hero">
+                <h1 data-local="welcome">Zero Brokerage Property Rental</h1>
+                <p data-local="tagline">Skip the broker. Connect directly with owners.</p>
+                
+                <div class="search-box">
+                    <input type="text" id="homeSearchInput" placeholder="Search direct owner apartments by address, price, or rooms...">
+                    <button id="homeSearchBtn" class="btn btn-primary">Search</button>
+                </div>
+            </div>
+
+            <!-- Property Categories Section -->
+            <div class="services-container container">
+                <h2 class="section-title text-center" style="margin-bottom: 40px; font-weight: 700; font-size: 2.2rem; background: linear-gradient(135deg, #fff 0%, #aaa 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-align: center;">Property Categories</h2>
+                <div class="services-grid">
+                    <!-- Apartments & Flats -->
+                    <div class="service-card glass-premium" onclick="openCategoryExplore('apartments')">
+                        <div class="service-card-glow"></div>
+                        <span class="service-icon-premium">🏠</span>
+                        <h3 data-local="apartments_flats">Apartments & Flats</h3>
+                        <p class="service-subtitle" data-local="apartments_flats_desc">1BHK, 2BHK, 3BHK, Studio Apartments</p>
+                        <div class="category-rating">⭐ 4.8 <span>(120+ reviews)</span></div>
+                        <ul class="subcategories-list">
+                            <li>Studio Apartments</li>
+                            <li>1 BHK & 2 BHK</li>
+                            <li>3 BHK & Premium</li>
+                        </ul>
+                        <div class="explore-cta">
+                            <span>Explore Properties</span>
+                            <span class="arrow-icon">→</span>
+                        </div>
+                    </div>
+                    <!-- Independent Houses & Villas -->
+                    <div class="service-card glass-premium" onclick="openCategoryExplore('houses')">
+                        <div class="service-card-glow"></div>
+                        <span class="service-icon-premium">🏡</span>
+                        <h3 data-local="independent_houses">Independent Houses & Villas</h3>
+                        <p class="service-subtitle" data-local="independent_houses_desc">Villas, Duplexes, Row Houses, Independent Homes</p>
+                        <div class="category-rating">⭐ 4.9 <span>(85 reviews)</span></div>
+                        <ul class="subcategories-list">
+                            <li>Villas & Duplexes</li>
+                            <li>Row & Independent Houses</li>
+                            <li>Luxury Residences</li>
+                        </ul>
+                        <div class="explore-cta">
+                            <span>Explore Properties</span>
+                            <span class="arrow-icon">→</span>
+                        </div>
+                    </div>
+                    <!-- Commercial Properties -->
+                    <div class="service-card glass-premium" onclick="openCategoryExplore('commercial')">
+                        <div class="service-card-glow"></div>
+                        <span class="service-icon-premium">🏢</span>
+                        <h3 data-local="commercial_properties">Commercial Properties</h3>
+                        <p class="service-subtitle" data-local="commercial_properties_desc">Offices, Shops, Showrooms, Co-working Spaces</p>
+                        <div class="category-rating">⭐ 4.7 <span>(45 reviews)</span></div>
+                        <ul class="subcategories-list">
+                            <li>Office Spaces & Shops</li>
+                            <li>Showrooms & Warehouses</li>
+                            <li>Co-working Spaces</li>
+                        </ul>
+                        <div class="explore-cta">
+                            <span>Explore Properties</span>
+                            <span class="arrow-icon">→</span>
+                        </div>
+                    </div>
+                    <!-- Land & Plots -->
+                    <div class="service-card glass-premium" onclick="openCategoryExplore('plots')">
+                        <div class="service-card-glow"></div>
+                        <span class="service-icon-premium">🌿</span>
+                        <h3 data-local="land_plots">Land & Plots</h3>
+                        <p class="service-subtitle" data-local="land_plots_desc">Residential Plots, Commercial Plots, Agricultural Land</p>
+                        <div class="category-rating">⭐ 4.6 <span>(30 reviews)</span></div>
+                        <ul class="subcategories-list">
+                            <li>Residential & Commercial</li>
+                            <li>Agricultural Land</li>
+                            <li>Industrial & Investment</li>
+                        </ul>
+                        <div class="explore-cta">
+                            <span>Explore Properties</span>
+                            <span class="arrow-icon">→</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="home-grid container">
+                <!-- Analytics Sidebar -->
+                <div class="analytics-card glass">
+                    <h3 data-local="occupancy_rate_title">Occupancy and Rental Analysis</h3>
+                    <p class="analytics-summary" data-local="summary">This report lists the total numbers of apartments, highlighting how many are currently occupied versus vacant, and calculating the overall occupancy rate.</p>
+                    <div class="analytics-metrics" id="homeAnalyticsMetrics">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Available Apartments Grid -->
+                <div class="apartments-listings">
+                    <div class="section-header">
+                        <h2 data-local="apartments">Apartments</h2>
+                        <div class="view-toggle-bar" style="display: flex; gap: 8px; margin-right: 15px;">
+                            <button class="btn btn-outline btn-small active" id="btnHomeListView" onclick="toggleHomeViewMode('list')">🗂️ List</button>
+                            <button class="btn btn-outline btn-small" id="btnHomeMapView" onclick="toggleHomeViewMode('map')">🗺️ Map</button>
+                        </div>
+                    </div>
+                    <div class="listings-map-layout" id="homeListingsMapLayout">
+                        <div class="listings-grid" id="homeApartmentsList">
+                            <!-- Loaded dynamically -->
+                        </div>
+                        <div class="map-view-panel hidden" id="homeMapPanel">
+                            <div id="homeMap" style="height: 500px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow);"></div>
+                            <div class="map-legend glass" id="homeMapLegend" style="margin-top: 15px; padding: 15px; display: flex; justify-content: center; gap: 20px; align-items: center; flex-wrap: wrap;">
+                                <span style="font-weight: 600; color: #fff;">Legend:</span>
+                                <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.88rem;"><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#22c55e; border:1px solid #16a34a;"></span> Affordable (&lt; ₹10,000)</span>
+                                <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.88rem;"><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#eab308; border:1px solid #ca8a04;"></span> Moderate (₹10,000 - ₹25,000)</span>
+                                <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.88rem;"><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#ef4444; border:1px solid #dc2626;"></span> Premium (&gt; ₹25,000)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW: CATEGORY EXPLORE ==================== -->
+        <section id="viewCategoryExplore" class="view-section hidden container">
+            <div class="category-explore-header">
+                <button onclick="switchView('viewHome')" class="btn btn-outline back-btn">
+                    <span>←</span> Back to Home
+                </button>
+                <div class="category-title-wrap">
+                    <span id="exploreCategoryIcon" class="category-icon-large">🏠</span>
+                    <h1 id="exploreCategoryTitle">Apartments & Flats</h1>
+                </div>
+            </div>
+
+            <!-- Category Specific Filter Bar -->
+            <div class="category-filter-card glass">
+                <div class="filter-inputs-grid">
+                    <div class="form-group">
+                        <label for="categorySearchInput">Search Properties</label>
+                        <input type="text" id="categorySearchInput" placeholder="Search by location, keyword...">
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryTypeSelect">Property Subtype</label>
+                        <select id="categoryTypeSelect">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryMinPrice">Min Price (₹)</label>
+                        <input type="number" id="categoryMinPrice" placeholder="No Min">
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryMaxPrice">Max Price (₹)</label>
+                        <input type="number" id="categoryMaxPrice" placeholder="No Max">
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button onclick="applyCategoryFilters()" class="btn btn-primary">Apply Filters</button>
+                    <button onclick="resetCategoryFilters()" class="btn btn-outline">Reset</button>
+                </div>
+            </div>
+
+            <!-- Category Listings Grid -->
+            <div class="category-listings-section">
+                <div class="section-header" style="margin-bottom: 20px;">
+                    <h2 class="section-title" style="margin-bottom: 0;">Available Listings</h2>
+                    <div class="view-toggle-bar" style="display: flex; gap: 8px;">
+                        <button class="btn btn-outline btn-small active" id="btnCategoryListView" onclick="toggleCategoryViewMode('list')">🗂️ List</button>
+                        <button class="btn btn-outline btn-small" id="btnCategoryMapView" onclick="toggleCategoryViewMode('map')">🗺️ Map</button>
+                    </div>
+                </div>
+                <div class="listings-map-layout" id="categoryListingsMapLayout">
+                    <div class="listings-grid" id="categoryPropertiesList">
+                        <!-- Populated dynamically -->
+                    </div>
+                    <div class="map-view-panel hidden" id="categoryMapPanel">
+                        <div id="categoryMap" style="height: 500px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow);"></div>
+                        <div class="map-legend glass" id="categoryMapLegend" style="margin-top: 15px; padding: 15px; display: flex; justify-content: center; gap: 20px; align-items: center; flex-wrap: wrap;">
+                            <span style="font-weight: 600; color: #fff;">Legend:</span>
+                            <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.88rem;"><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#22c55e; border:1px solid #16a34a;"></span> Affordable (&lt; ₹10,000)</span>
+                            <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.88rem;"><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#eab308; border:1px solid #ca8a04;"></span> Moderate (₹10,000 - ₹25,000)</span>
+                            <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.88rem;"><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#ef4444; border:1px solid #dc2626;"></span> Premium (&gt; ₹25,000)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW: LOGIN ==================== -->
+        <section id="viewLogin" class="view-section hidden">
+            <div class="auth-container">
+                <div class="auth-card glass">
+                    <div class="auth-tabs" id="authTabsContainer">
+                        <button class="auth-tab-btn active" id="btnTabTenant" onclick="setLoginRole('tenant')" data-local="tenant_login">Tenant Login</button>
+                        <button class="auth-tab-btn" id="btnTabManager" onclick="setLoginRole('manager')" data-local="manager_login">Manager Login</button>
+                        <button class="auth-tab-btn" id="btnTabOwner" onclick="setLoginRole('owner')" data-local="owner_login">Owner Login</button>
+                    </div>
+
+                    <h2 class="auth-title" id="loginTitle" data-local="tenant_login">Tenant Login</h2>
+                    
+                    <!-- 1. Standard Login Flow -->
+                    <div id="loginStandardFlow">
+                        <form id="loginForm" class="auth-form">
+                            <div class="form-group" id="loginNameGroup">
+                                <label for="loginName">Name</label>
+                                <input type="text" id="loginName" name="name" autocomplete="name" placeholder="Enter your name">
+                            </div>
+                            <div class="form-group" id="loginEmailGroup">
+                                <label for="loginEmail" id="loginEmailLabel" data-local="email">Email</label>
+                                <input type="email" id="loginEmail" name="email" autocomplete="username" placeholder="name@email.com">
+                            </div>
+                            <div class="form-group hidden" id="loginRegGroup" style="display:none;">
+                                <label for="loginRegNum">Registration Number</label>
+                                <input type="text" id="loginRegNum" name="registrationNumber" autocomplete="username" placeholder="Enter Registration Number">
+                            </div>
+                            <div class="form-group">
+                                <label for="loginPassword" data-local="password">Password</label>
+                                <input type="password" id="loginPassword" name="password" autocomplete="current-password" required placeholder="••••••••">
+                            </div>
+                            <div class="form-group checkbox-group" style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+                                <input type="checkbox" id="loginRememberMe" name="rememberMe" style="width: auto; cursor: pointer;">
+                                <label for="loginRememberMe" style="margin-bottom: 0; cursor: pointer;">Remember Me</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block" id="loginSubmitBtn">Login</button>
+                        </form>
+                        <div class="auth-extra-links" id="authExtraLinks" style="display: flex; justify-content: space-between; margin-top: 15px; font-size: 0.9rem;">
+                            <a href="#" onclick="showOtpFlow(event)" id="linkLoginOtp" style="color: var(--primary); text-decoration: none; font-weight: 500;">Login with OTP</a>
+                            <a href="#" onclick="showForgotPasswordFlow(event)" id="linkForgotPwd" style="color: var(--text-muted); text-decoration: none;">Forgot Password?</a>
+                        </div>
+                    </div>
+
+                    <!-- 2. OTP Login Flow -->
+                    <div id="loginOtpFlow" class="hidden" style="display:none;">
+                        <!-- Step 1: Send OTP -->
+                        <div id="otpSendSection" class="auth-form">
+                            <div class="form-group">
+                                <label for="otpSendIdentifier" id="otpSendIdentifierLabel">Email Address</label>
+                                <input type="text" id="otpSendIdentifier" placeholder="Enter details">
+                            </div>
+                            <button type="button" onclick="handleSendOtp('login')" class="btn btn-primary btn-block">Send OTP</button>
+                        </div>
+                        
+                        <!-- Step 2: Verify OTP -->
+                        <div id="otpVerifySection" class="auth-form hidden" style="display:none;">
+                            <div class="form-group">
+                                <label for="otpVerifyCode">Enter 6-digit OTP</label>
+                                <input type="text" id="otpVerifyCode" maxlength="6" placeholder="******" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.3rem; font-weight: 600;">
+                            </div>
+                            <button type="button" onclick="handleVerifyOtp('login')" class="btn btn-primary btn-block">Verify OTP</button>
+                            <div class="otp-resend-wrap" style="text-align: center; margin-top: 15px; font-size: 0.9rem;">
+                                <span id="otpTimerText">Resend OTP in <span id="otpCountdown" style="font-weight: 600; color: var(--primary);">30</span>s</span>
+                                <a href="#" id="otpResendLink" onclick="resendOtp(event, 'login')" class="hidden" style="display:none; color: var(--primary); font-weight: 500; text-decoration: none;">Resend OTP</a>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 20px;">
+                            <a href="#" onclick="showStandardFlow(event)" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem;">← Back to Credentials Login</a>
+                        </div>
+                    </div>
+
+                    <!-- 3. Forgot Password Flow -->
+                    <div id="loginForgotFlow" class="hidden" style="display:none;">
+                        <!-- Step 1: Send OTP -->
+                        <div id="forgotSendSection" class="auth-form">
+                            <div class="form-group">
+                                <label for="forgotSendIdentifier" id="forgotSendIdentifierLabel">Email Address</label>
+                                <input type="text" id="forgotSendIdentifier" placeholder="Enter details">
+                            </div>
+                            <button type="button" onclick="handleSendOtp('forgot')" class="btn btn-primary btn-block">Send OTP</button>
+                        </div>
+                        
+                        <!-- Step 2: Verify OTP -->
+                        <div id="forgotVerifySection" class="auth-form hidden" style="display:none;">
+                            <div class="form-group">
+                                <label for="forgotVerifyCode">Enter 6-digit OTP</label>
+                                <input type="text" id="forgotVerifyCode" maxlength="6" placeholder="******" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.3rem; font-weight: 600;">
+                            </div>
+                            <button type="button" onclick="handleVerifyOtp('forgot')" class="btn btn-primary btn-block">Verify OTP</button>
+                            <div class="otp-resend-wrap" style="text-align: center; margin-top: 15px; font-size: 0.9rem;">
+                                <span id="forgotTimerText">Resend OTP in <span id="forgotCountdown" style="font-weight: 600; color: var(--primary);">30</span>s</span>
+                                <a href="#" id="forgotResendLink" onclick="resendOtp(event, 'forgot')" class="hidden" style="display:none; color: var(--primary); font-weight: 500; text-decoration: none;">Resend OTP</a>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Reset Password -->
+                        <div id="forgotResetSection" class="auth-form hidden" style="display:none;">
+                            <div class="form-group">
+                                <label for="forgotNewPassword">Create New Password</label>
+                                <input type="password" id="forgotNewPassword" placeholder="••••••••" required minlength="8">
+                            </div>
+                            <div class="form-group">
+                                <label for="forgotConfirmPassword">Confirm New Password</label>
+                                <input type="password" id="forgotConfirmPassword" placeholder="••••••••" required minlength="8">
+                            </div>
+                            <button type="button" onclick="handleResetPassword()" class="btn btn-primary btn-block">Reset Password</button>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 20px;">
+                            <a href="#" onclick="showStandardFlow(event)" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem;">← Back to Credentials Login</a>
+                        </div>
+                    </div>
+
+                    <div class="auth-footer" id="loginFooter">
+                        <span>Don't have a Tenant account?</span>
+                        <a href="#" onclick="switchView('viewRegister')" data-local="tenant_reg">Register here</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW: REGISTER ==================== -->
+        <section id="viewRegister" class="view-section hidden">
+            <div class="auth-container">
+                <div class="auth-card glass">
+                    <div class="auth-tabs">
+                        <button class="auth-tab-btn active" onclick="setRegisterRole('tenant')" data-local="tenant_reg">Tenant Registration</button>
+                        <button class="auth-tab-btn" onclick="setRegisterRole('owner')" data-local="owner_reg">Owner Registration</button>
+                    </div>
+
+                    <h2 class="auth-title" id="registerTitle" data-local="tenant_reg">Tenant Registration</h2>
+                    
+                    <form id="registerForm" class="auth-form">
+                        <div class="form-group">
+                            <label for="regName" data-local="name">Name</label>
+                            <input type="text" id="regName" required placeholder="Full Name">
+                        </div>
+                        <div class="form-group">
+                            <label for="regEmail" data-local="email">Email</label>
+                            <input type="email" id="regEmail" required placeholder="name@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="regPassword" data-local="password">Password</label>
+                            <input type="password" id="regPassword" required minlength="8" placeholder="At least 8 characters">
+                        </div>
+                        <div class="form-group">
+                            <label for="regPhone" data-local="phone">Phone Number</label>
+                            <input type="text" id="regPhone" required placeholder="+1 555-555-5555">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block" data-local="save">Register</button>
+                    </form>
+
+                    <div class="auth-footer">
+                        <span>Already have an account?</span>
+                        <a href="#" onclick="switchView('viewLogin')">Login here</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW: OWNER DASHBOARD ==================== -->
+        <section id="viewOwnerDashboard" class="view-section hidden container">
+            <h1 class="dashboard-title">Owner Control Panel</h1>
+            <div class="dashboard-tabs">
+                <button class="dash-tab active" onclick="switchDashTab('owner', 'managersTab')" data-local="managers">Managers</button>
+                <button class="dash-tab" onclick="switchDashTab('owner', 'tenantsTab')" data-local="tenants">Tenants</button>
+                <button class="dash-tab" onclick="switchDashTab('owner', 'buildingsTab')" data-local="buildings">Buildings</button>
+                <button class="dash-tab" onclick="switchDashTab('owner', 'apartmentsTab')" data-local="apartments">Apartments</button>
+                <button class="dash-tab" onclick="switchDashTab('owner', 'messagesTab')" data-local="messages">Messages</button>
+                <button class="dash-tab" onclick="switchDashTab('owner', 'eventsTab')" data-local="events">Maintenance Events</button>
+                <button class="dash-tab" onclick="switchDashTab('owner', 'profileTab')" data-local="profile">Profile</button>
+            </div>
+
+            <!-- Tab: Managers -->
+            <div id="owner-managersTab" class="dash-panel active">
+                <div class="section-header">
+                    <h2 data-local="managers">Managers</h2>
+                    <button onclick="openCreateModal('manager')" class="btn btn-primary" data-local="create">Create Manager</button>
+                </div>
+                <div class="table-container glass">
+                    <table id="ownerManagersTable">
+                        <thead>
+                            <tr>
+                                <th data-local="name">Name</th>
+                                <th data-local="email">Email</th>
+                                <th data-local="phone">Phone Number</th>
+                                <th data-local="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Tenants -->
+            <div id="owner-tenantsTab" class="dash-panel hidden">
+                <div class="section-header">
+                    <h2 data-local="tenants">Tenants</h2>
+                    <div class="search-box inline-search">
+                        <input type="text" id="ownerTenantSearchInput" placeholder="Filter by email...">
+                    </div>
+                </div>
+                <div class="table-container glass">
+                    <table id="ownerTenantsTable">
+                        <thead>
+                            <tr>
+                                <th data-local="name">Name</th>
+                                <th data-local="email">Email</th>
+                                <th data-local="phone">Phone Number</th>
+                                <th data-local="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Buildings -->
+            <div id="owner-buildingsTab" class="dash-panel hidden">
+                <div class="section-header">
+                    <h2 data-local="buildings">Buildings</h2>
+                </div>
+                <div class="table-container glass">
+                    <table id="ownerBuildingsTable">
+                        <thead>
+                            <tr>
+                                <th data-local="address">Address</th>
+                                <th data-local="city">City</th>
+                                <th data-local="province">Province</th>
+                                <th data-local="postal_code">Postal Code</th>
+                                <th data-local="managers">Manager</th>
+                                <th data-local="apartments">Total Apartments</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Apartments -->
+            <div id="owner-apartmentsTab" class="dash-panel hidden">
+                <div class="section-header">
+                    <h2 data-local="apartments">Apartments</h2>
+                </div>
+                <div class="table-container glass">
+                    <table id="ownerApartmentsTable">
+                        <thead>
+                            <tr>
+                                <th>Apt No.</th>
+                                <th data-local="address">Building Address</th>
+                                <th data-local="rooms">Rooms</th>
+                                <th data-local="price">Price</th>
+                                <th data-local="status">Status</th>
+                                <th data-local="tenants">Tenant</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Messages -->
+            <div id="owner-messagesTab" class="dash-panel hidden">
+                <div class="section-header">
+                    <h2 data-local="messages">Messages</h2>
+                    <button onclick="openCreateMessageModal('owner')" class="btn btn-primary" data-local="create">Send Message to Manager</button>
+                </div>
+                <div class="message-list" id="ownerMessagesList"></div>
+            </div>
+
+            <!-- Tab: Events -->
+            <div id="owner-eventsTab" class="dash-panel hidden">
+                <div class="section-header">
+                    <h2 data-local="events">Maintenance Events</h2>
+                </div>
+                <div class="table-container glass">
+                    <table id="ownerEventsTable">
+                        <thead>
+                            <tr>
+                                <th>Apt No.</th>
+                                <th data-local="address">Building Address</th>
+                                <th data-local="managers">Manager</th>
+                                <th data-local="description">Description</th>
+                                <th data-local="date">Date Reported</th>
+                                <th data-local="status">Status</th>
+                                <th data-local="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Profile -->
+            <div id="owner-profileTab" class="dash-panel hidden">
+                <h2 data-local="profile">Profile Details</h2>
+                <div class="profile-card glass">
+                    <form id="ownerProfileForm">
+                        <div class="form-group">
+                            <label for="ownerProfName" data-local="name">Name</label>
+                            <input type="text" id="ownerProfName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ownerProfEmail" data-local="email">Email</label>
+                            <input type="email" id="ownerProfEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ownerProfPhone" data-local="phone">Phone Number</label>
+                            <input type="text" id="ownerProfPhone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ownerProfPassword" data-local="password">New Password (leave blank to retain current)</label>
+                            <input type="password" id="ownerProfPassword" placeholder="••••••••">
+                        </div>
+                        <div class="profile-actions">
+                            <button type="submit" class="btn btn-primary" data-local="save">Update Profile</button>
+                            <button type="button" onclick="deleteAccount('owner')" class="btn btn-danger" data-local="delete">Delete Account</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW: MANAGER DASHBOARD ==================== -->
+        <section id="viewManagerDashboard" class="view-section hidden container">
+            <h1 class="dashboard-title">Manager Control Panel</h1>
+            <div class="dashboard-tabs">
+                <button class="dash-tab active" onclick="switchDashTab('manager', 'buildingsTab')" data-local="buildings">Buildings</button>
+                <button class="dash-tab" onclick="switchDashTab('manager', 'apartmentsTab')" data-local="apartments">Apartments</button>
+                <button class="dash-tab" onclick="switchDashTab('manager', 'appointmentsTab')" data-local="appointments">Appointments</button>
+                <button class="dash-tab" onclick="switchDashTab('manager', 'messagesTab')" data-local="messages">Messages</button>
+                <button class="dash-tab" onclick="switchDashTab('manager', 'eventsTab')" data-local="events">Maintenance Events</button>
+                <button class="dash-tab" onclick="switchDashTab('manager', 'profileTab')" data-local="profile">Profile</button>
+            </div>
+
+            <!-- Tab: Buildings -->
+            <div id="manager-buildingsTab" class="dash-panel active">
+                <div class="section-header">
+                    <h2 data-local="buildings">Buildings</h2>
+                    <button onclick="openCreateBuildingModal()" class="btn btn-primary" data-local="create">Create Building</button>
+                </div>
+                <div class="table-container glass">
+                    <table id="managerBuildingsTable">
+                        <thead>
+                            <tr>
+                                <th data-local="address">Address</th>
+                                <th data-local="city">City</th>
+                                <th data-local="province">Province</th>
+                                <th data-local="postal_code">Postal Code</th>
+                                <th>Owner Name</th>
+                                <th data-local="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Apartments -->
+            <div id="manager-apartmentsTab" class="dash-panel hidden">
+                <div class="section-header">
+                    <h2 data-local="apartments">Apartments</h2>
+                    <button onclick="openCreateApartmentModal()" class="btn btn-primary" data-local="create">Create Apartment</button>
+                </div>
+                <div class="table-container glass">
+                    <table id="managerApartmentsTable">
+                        <thead>
+                            <tr>
+                                <th>Apt No.</th>
+                                <th data-local="address">Building Address</th>
+                                <th data-local="rooms">Rooms</th>
+                                <th data-local="price">Price</th>
+                                <th data-local="status">Status</th>
+                                <th data-local="tenants">Tenant</th>
+                                <th data-local="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Appointments -->
+            <div id="manager-appointmentsTab" class="dash-panel hidden">
+                <div class="section-header">
+                    <h2 data-local="appointments">Appointments</h2>
+                </div>
+                <div class="table-container glass">
+                    <table id="managerAppointmentsTable">
+                        <thead>
+                            <tr>
+                                <th data-local="tenants">Tenant</th>
+                                <th data-local="date">Date & Time</th>
+                                <th data-local="description">Description</th>
+                                <th data-local="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Messages -->
+            <div id="manager-messagesTab" class="dash-panel hidden">
+                <div class="section-header">
+                    <h2 data-local="messages">Messages</h2>
+                </div>
+                <div class="manager-messages-grid">
+                    <div class="messages-col glass">
+                        <h3>Tenant Communication</h3>
+                        <div id="managerTenantMessages" class="message-list-sub"></div>
+                    </div>
+                    <div class="messages-col glass">
+                        <h3>Owner Communication</h3>
+                        <div id="managerOwnerMessages" class="message-list-sub"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Events -->
+            <div id="manager-eventsTab" class="dash-panel hidden">
+                <div class="section-header">
+                    <h2 data-local="events">Maintenance Events</h2>
+                    <button onclick="openCreateEventModal()" class="btn btn-primary" data-local="create">Report Event to Owner</button>
+                </div>
+                <div class="table-container glass">
+                    <table id="managerEventsTable">
+                        <thead>
+                            <tr>
+                                <th>Apt No.</th>
+                                <th data-local="address">Building Address</th>
+                                <th>Owner</th>
+                                <th data-local="description">Description</th>
+                                <th data-local="date">Date</th>
+                                <th data-local="status">Status</th>
+                                <th data-local="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Profile -->
+            <div id="manager-profileTab" class="dash-panel hidden">
+                <h2 data-local="profile">Profile Details</h2>
+                <div class="profile-card glass">
+                    <form id="managerProfileForm">
+                        <div class="form-group">
+                            <label for="mgrProfName" data-local="name">Name</label>
+                            <input type="text" id="mgrProfName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="mgrProfEmail" data-local="email">Email</label>
+                            <input type="email" id="mgrProfEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="mgrProfPhone" data-local="phone">Phone Number</label>
+                            <input type="text" id="mgrProfPhone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="mgrProfPassword" data-local="password">New Password (leave blank to retain current)</label>
+                            <input type="password" id="mgrProfPassword" placeholder="••••••••">
+                        </div>
+                        <div class="profile-actions">
+                            <button type="submit" class="btn btn-primary" data-local="save">Update Profile</button>
+                            <button type="button" onclick="deleteAccount('manager')" class="btn btn-danger" data-local="delete">Delete Account</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW: TENANT DASHBOARD ==================== -->
+        <section id="viewTenantDashboard" class="view-section hidden container">
+            <h1 class="dashboard-title">Tenant Dashboard</h1>
+            <div class="dashboard-tabs">
+                <button class="dash-tab active" onclick="switchDashTab('tenant', 'searchTab')" data-local="apartments">Browse Apartments</button>
+                <button class="dash-tab" onclick="switchDashTab('tenant', 'appointmentsTab')" data-local="appointments">Appointments</button>
+                <button class="dash-tab" onclick="switchDashTab('tenant', 'messagesTab')" data-local="messages">Messages</button>
+                <button class="dash-tab" onclick="switchDashTab('tenant', 'profileTab')" data-local="profile">Profile</button>
+            </div>
+
+            <!-- Tab: Browse -->
+            <div id="tenant-searchTab" class="dash-panel active">
+                <div class="section-header">
+                    <h2 data-local="apartments">Search Apartments</h2>
+                    <div class="search-box inline-search">
+                        <input type="text" id="tenantAptSearchInput" placeholder="Search price, rooms, location...">
+                    </div>
+                </div>
+                <div class="listings-grid" id="tenantApartmentsList"></div>
+            </div>
+
+            <!-- Tab: Appointments -->
+            <div id="tenant-appointmentsTab" class="dash-panel hidden">
+                <div class="section-header">
+                    <h2 data-local="appointments">Booked Appointments</h2>
+                    <button onclick="openCreateAppointmentModal()" class="btn btn-primary" data-local="create">Book Appointment</button>
+                </div>
+                <div class="table-container glass">
+                    <table id="tenantAppointmentsTable">
+                        <thead>
+                            <tr>
+                                <th data-local="managers">Manager</th>
+                                <th data-local="date">Date & Time</th>
+                                <th data-local="description">Description</th>
+                                <th data-local="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Messages -->
+            <div id="tenant-messagesTab" class="dash-panel hidden">
+                <div class="section-header">
+                    <h2 data-local="messages">Messages</h2>
+                    <button onclick="openCreateMessageModal('tenant')" class="btn btn-primary" data-local="create">Contact Manager</button>
+                </div>
+                <div class="message-list" id="tenantMessagesList"></div>
+            </div>
+
+            <!-- Tab: Profile -->
+            <div id="tenant-profileTab" class="dash-panel hidden">
+                <h2 data-local="profile">Profile Details</h2>
+                <div class="profile-card glass">
+                    <form id="tenantProfileForm">
+                        <div class="form-group">
+                            <label for="tntProfName" data-local="name">Name</label>
+                            <input type="text" id="tntProfName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tntProfEmail" data-local="email">Email</label>
+                            <input type="email" id="tntProfEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tntProfPhone" data-local="phone">Phone Number</label>
+                            <input type="text" id="tntProfPhone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tntProfPassword" data-local="password">New Password (leave blank to retain current)</label>
+                            <input type="password" id="tntProfPassword" placeholder="••••••••">
+                        </div>
+                        <div class="profile-actions">
+                            <button type="submit" class="btn btn-primary" data-local="save">Update Profile</button>
+                            <button type="button" onclick="deleteAccount('tenant')" class="btn btn-danger" data-local="delete">Delete Account</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 RentArena Technologies Solutions Pvt. Ltd.</p>
+        </div>
+    </footer>
+
+    <!-- ==================== MODALS ==================== -->
+    <div id="modalContainer" class="modal-overlay hidden">
+        <!-- Dynamic content injected by app.js (modals for CRUD) -->
+        <div class="modal-card glass" id="modalCard">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h3 id="modalTitle">Modal Title</h3>
+                <button onclick="closeModal()" class="close-modal-btn">&times;</button>
+            </div>
+            <!-- Modal Body -->
+            <div class="modal-body" id="modalBody">
+                <!-- Injected form fields -->
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/app.js"></script>
+</body>
+</html>
