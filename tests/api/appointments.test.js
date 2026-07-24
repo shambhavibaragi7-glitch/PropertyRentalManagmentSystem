@@ -100,4 +100,41 @@ describe('Appointments API Endpoints', () => {
             );
         });
     });
+
+    describe('PATCH /api/appointments/:id/status', () => {
+        it('should successfully update appointment status to accepted', async () => {
+            db.fetchOne.mockResolvedValue({ appointmentId: 1 });
+            db.query.mockResolvedValue({ affectedRows: 1 });
+
+            const response = await request(app)
+                .patch('/api/appointments/1/status')
+                .set('x-user-role', 'manager')
+                .send({ status: 'accepted' });
+
+            expect(response.status).toBe(200);
+            expect(response.body.status).toBe('success');
+            expect(db.query).toHaveBeenCalledWith(
+                expect.stringContaining('UPDATE appointment SET status = ?'),
+                expect.arrayContaining(['accepted', 1])
+            );
+        });
+
+        it('should return 400 if status is not provided', async () => {
+            const response = await request(app)
+                .patch('/api/appointments/1/status')
+                .set('x-user-role', 'manager')
+                .send({});
+
+            expect(response.status).toBe(400);
+        });
+
+        it('should return 403 if request is made by a tenant', async () => {
+            const response = await request(app)
+                .patch('/api/appointments/1/status')
+                .set('x-user-role', 'tenant')
+                .send({ status: 'accepted' });
+
+            expect(response.status).toBe(403);
+        });
+    });
 });

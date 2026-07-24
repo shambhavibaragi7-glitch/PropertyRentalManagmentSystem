@@ -10,8 +10,11 @@ router.get('/', async (req, res) => {
     const { status, min_price, max_price, manager_id, tenant_id, owner_id, search } = req.query;
 
     let queryStr = `
-        SELECT a.*, b.address as buildingAddress, b.city as buildingCity, b.province as buildingProvince, 
-               b.postalCode as buildingPostalCode, b.managerId, b.ownerId, b.latitude, b.longitude, t.name as tenantName
+        SELECT a.apartmentId, a.apartmentNo, a.nbRooms, a.price, a.status, a.buildingId, a.tenantId, a.subtype,
+               b.address as buildingAddress, b.city as buildingCity, b.province as buildingProvince, 
+               b.postalCode as buildingPostalCode, b.managerId, b.ownerId, b.latitude, b.longitude, 
+               t.name as tenantName,
+               a.description, a.image
         FROM apartment a
         JOIN building b ON a.buildingId = b.buildingId
         LEFT JOIN tenant t ON a.tenantId = t.tenantId
@@ -50,6 +53,17 @@ router.get('/', async (req, res) => {
     }
 
     if (search) {
+        const bhkMatch = search.match(/(\d+)\s*bhk/i);
+        const roomMatch = search.match(/(\d+)\s*room/i);
+        const studioMatch = /studio/i.test(search);
+        
+        let targetRooms = null;
+        if (bhkMatch) {
+            targetRooms = parseInt(bhkMatch[1]);
+        } else if (roomMatch) {
+            targetRooms = parseInt(roomMatch[1]);
+        }
+
         queryStr += ` AND (
             CAST(a.apartmentNo AS VARCHAR(50)) LIKE ? OR
             b.address LIKE ? OR
@@ -59,9 +73,14 @@ router.get('/', async (req, res) => {
             CAST(a.nbRooms AS VARCHAR(50)) LIKE ? OR
             CAST(a.price AS VARCHAR(50)) LIKE ? OR
             a.status LIKE ?
+            ${targetRooms !== null ? "OR a.nbRooms = ?" : ""}
+            ${studioMatch ? "OR a.nbRooms = 0" : ""}
         )`;
         const searchWild = `%${search}%`;
         params.push(searchWild, searchWild, searchWild, searchWild, searchWild, searchWild, searchWild, searchWild);
+        if (targetRooms !== null) {
+            params.push(targetRooms);
+        }
     }
 
     try {
@@ -90,11 +109,15 @@ router.get('/:id', async (req, res) => {
     const apartmentId = req.params.id;
 
     const queryStr = `
-        SELECT a.*, b.address as buildingAddress, b.city as buildingCity, b.province as buildingProvince, 
-               b.postalCode as buildingPostalCode, b.managerId, b.ownerId, b.latitude, b.longitude, t.name as tenantName
+        SELECT a.apartmentId, a.apartmentNo, a.nbRooms, a.price, a.status, a.buildingId, a.tenantId, a.subtype,
+               b.address as buildingAddress, b.city as buildingCity, b.province as buildingProvince, 
+               b.postalCode as buildingPostalCode, b.managerId, b.ownerId, b.latitude, b.longitude, 
+               t.name as tenantName, o.name as ownerName, o.email as ownerEmail, o.phoneNumber as ownerPhone,
+               a.description, a.image
         FROM apartment a
         JOIN building b ON a.buildingId = b.buildingId
         LEFT JOIN tenant t ON a.tenantId = t.tenantId
+        LEFT JOIN owner o ON b.ownerId = o.ownerId
         WHERE a.apartmentId = ?
     `;
 
@@ -122,7 +145,7 @@ router.get('/:id', async (req, res) => {
 // POST /api/apartments
 router.post('/', async (req, res) => {
     const locale = localizations.getLocaleFromHeader(req.headers['accept-language']);
-    const { apartmentNo, nbRooms, price, status, buildingId, tenantId } = req.body;
+    const { apartmentNo, nbRooms, price, status, buildingId, tenantId, image, description, subtype } = req.body;
 
     if (apartmentNo === undefined || nbRooms === undefined || price === undefined || !status || buildingId === undefined) {
         return res.status(400).json({ detail: "apartmentNo, nbRooms, price, status, and buildingId are required." });
@@ -130,8 +153,8 @@ router.post('/', async (req, res) => {
 
     try {
         await db.query(
-            "INSERT INTO apartment (apartmentNo, nbRooms, price, status, buildingId, tenantId) VALUES (?, ?, ?, ?, ?, ?)",
-            [apartmentNo, nbRooms, price, status, buildingId, tenantId || null]
+            "INSERT INTO apartment (apartmentNo, nbRooms, price, status, buildingId, tenantId, image, description, subtype) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [apartmentNo, nbRooms, price, status, buildingId, tenantId || null, image || null, description || null, subtype || null]
         );
         res.json({
             status: "success",
@@ -147,7 +170,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     const locale = localizations.getLocaleFromHeader(req.headers['accept-language']);
     const apartmentId = req.params.id;
-    const { apartmentNo, nbRooms, price, status, buildingId, tenantId } = req.body;
+    const { apartmentNo, nbRooms, price, status, buildingId, tenantId, image, description, subtype } = req.body;
 
     if (apartmentNo === undefined || nbRooms === undefined || price === undefined || !status || buildingId === undefined) {
         return res.status(400).json({ detail: "apartmentNo, nbRooms, price, status, and buildingId are required." });
@@ -160,8 +183,8 @@ router.put('/:id', async (req, res) => {
         }
 
         await db.query(
-            "UPDATE apartment SET apartmentNo = ?, nbRooms = ?, price = ?, status = ?, buildingId = ?, tenantId = ? WHERE apartmentId = ?",
-            [apartmentNo, nbRooms, price, status, buildingId, tenantId || null, apartmentId]
+            "UPDATE apartment SET apartmentNo = ?, nbRooms = ?, price = ?, status = ?, buildingId = ?, tenantId = ?, image = ?, description = ?, subtype = ? WHERE apartmentId = ?",
+            [apartmentNo, nbRooms, price, status, buildingId, tenantId || null, image || null, description || null, subtype || null, apartmentId]
         );
 
         res.json({

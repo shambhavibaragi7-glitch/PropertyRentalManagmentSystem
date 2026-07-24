@@ -10,18 +10,22 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
+import org.testng.ITestContext;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+import com.aventstack.extentreports.Status;
 
 import java.time.Duration;
 
+@Listeners(ExtentReportListener.class)
 public class HomeE2ETest {
     private WebDriver driver;
     private WebDriverWait wait;
 
     @BeforeMethod
-    public void setUp() {
+    public void setUp(ITestContext context) {
         WebDriverManager.chromedriver().setup();
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless=new"); // Runs browser headlessly for CLI/CI stability
@@ -30,6 +34,9 @@ public class HomeE2ETest {
         options.addArguments("--disable-dev-shm-usage");
         
         driver = new ChromeDriver(options);
+        context.setAttribute("WebDriver", driver);
+        ExtentReportListener.log(Status.INFO, "Initialized ChromeDriver in headless=true mode");
+        
         wait = new WebDriverWait(driver, Duration.ofSeconds(5));
         driver.get("http://localhost:8000/");
     }
@@ -109,6 +116,7 @@ public class HomeE2ETest {
     public void tearDown() {
         if (driver != null) {
             driver.quit();
+            ExtentReportListener.log(Status.INFO, "WebDriver closed successfully.");
         }
     }
 }

@@ -22,7 +22,9 @@ router.get('/', async (req, res) => {
     const { manager_id, owner_id } = req.query;
 
     let queryStr = `
-        SELECT e.*, m.name as managerName, o.name as ownerName, a.apartmentNo
+        SELECT e.eventId, e.managerId, e.ownerId, e.apartmentId, e.eventDate, e.description, e.status,
+               m.name as managerName, o.name as ownerName, a.apartmentNo,
+               e.reply
         FROM eventOwner e
         JOIN manager m ON e.managerId = m.managerId
         JOIN owner o ON e.ownerId = o.ownerId
@@ -66,7 +68,9 @@ router.get('/:id', async (req, res) => {
     const eventId = req.params.id;
 
     const queryStr = `
-        SELECT e.*, m.name as managerName, o.name as ownerName, a.apartmentNo
+        SELECT e.eventId, e.managerId, e.ownerId, e.apartmentId, e.eventDate, e.description, e.status,
+               m.name as managerName, o.name as ownerName, a.apartmentNo,
+               e.reply
         FROM eventOwner e
         JOIN manager m ON e.managerId = m.managerId
         JOIN owner o ON e.ownerId = o.ownerId
@@ -124,7 +128,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     const locale = localizations.getLocaleFromHeader(req.headers['accept-language']);
     const eventId = req.params.id;
-    const { role, description, status } = req.body;
+    const { role, description, status, reply } = req.body;
 
     if (!role) {
         return res.status(400).json({ detail: "role is required." });
@@ -133,15 +137,15 @@ router.put('/:id', async (req, res) => {
     const lowerRole = role.toLowerCase();
 
     try {
-        const existing = await db.fetchOne("SELECT managerId, ownerId, description, status FROM eventOwner WHERE eventId = ?", [eventId]);
+        const existing = await db.fetchOne("SELECT managerId, ownerId, description, status, reply FROM eventOwner WHERE eventId = ?", [eventId]);
         if (!existing) {
             return res.status(404).json({ detail: "Event not found." });
         }
 
         if (lowerRole === 'owner') {
             await db.query(
-                "UPDATE eventOwner SET status = ? WHERE eventId = ?",
-                [status || existing.status, eventId]
+                "UPDATE eventOwner SET status = ?, reply = ? WHERE eventId = ?",
+                [status || existing.status, reply !== undefined ? reply : existing.reply, eventId]
             );
         } else if (lowerRole === 'manager') {
             await db.query(

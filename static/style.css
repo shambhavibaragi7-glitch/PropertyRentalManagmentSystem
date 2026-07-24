@@ -506,6 +506,16 @@ body {
     color: #f87171;
 }
 
+.status-badge.accepted {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+}
+
+.status-badge.pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+}
+
 /* AUTHENTICATION */
 .auth-container {
     max-width: 450px;

@@ -36,8 +36,8 @@ $oldLocation = Get-Location
 Set-Location "$PSScriptRoot\selenium-tests"
 
 try {
-    # Run Maven clean test
-    & $MvnPath clean test
+    # Run Maven test (without clean to avoid Windows file locks)
+    & $MvnPath test
     $exitCode = $LASTEXITCODE
 } finally {
     Set-Location $oldLocation

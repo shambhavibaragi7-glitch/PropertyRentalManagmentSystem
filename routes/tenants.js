@@ -9,17 +9,31 @@ function sha256Hash(data) {
     return crypto.createHash('sha256').update(data).digest('hex');
 }
 
+function validatePassword(password) {
+    if (typeof password !== 'string') return false;
+    if (password.length !== 8) return false;
+    if (!/[A-Z]/.test(password)) return false;
+    if (!/[a-z]/.test(password)) return false;
+    if (!/[0-9]/.test(password)) return false;
+    return true;
+}
+
 // GET /api/tenants
 router.get('/', async (req, res) => {
     const locale = localizations.getLocaleFromHeader(req.headers['accept-language']);
     const search = req.query.search;
+    const reqRole = req.headers['x-user-role'];
+    const reqUserId = req.headers['x-user-id'];
 
     let queryStr = "SELECT tenantId, name, email, phoneNumber FROM tenant WHERE 1=1";
     let params = [];
 
-    if (search) {
+    if (reqRole === 'tenant') {
+        queryStr += " AND tenantId = ?";
+        params.push(parseInt(reqUserId));
+    } else if (search) {
         queryStr += " AND email LIKE ?";
-        params.append(`%${search}%`);
+        params.push(`%${search}%`);
     }
 
     try {
@@ -40,6 +54,13 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     const locale = localizations.getLocaleFromHeader(req.headers['accept-language']);
     const tenantId = req.params.id;
+    const reqRole = req.headers['x-user-role'];
+    const reqUserId = req.headers['x-user-id'];
+
+    if (reqRole === 'tenant' && String(tenantId) !== String(reqUserId)) {
+        return res.status(403).json({ detail: "Access denied. You can only view your own profile." });
+    }
+
     try {
         const tenantObj = await db.fetchOne("SELECT tenantId, name, email, phoneNumber FROM tenant WHERE tenantId = ?", [tenantId]);
         if (!tenantObj) {
@@ -63,6 +84,10 @@ router.post('/', async (req, res) => {
 
     if (!name || !email || !password || !phoneNumber) {
         return res.status(400).json({ detail: "Name, email, password, and phoneNumber are required." });
+    }
+
+    if (!validatePassword(password)) {
+        return res.status(400).json({ detail: "Password must be exactly 8 characters long and contain at least one uppercase letter, one lowercase letter, and one numeric digit." });
     }
 
     try {
@@ -92,9 +117,19 @@ router.put('/:id', async (req, res) => {
     const locale = localizations.getLocaleFromHeader(req.headers['accept-language']);
     const tenantId = req.params.id;
     const { name, email, password, phoneNumber } = req.body;
+    const reqRole = req.headers['x-user-role'];
+    const reqUserId = req.headers['x-user-id'];
+
+    if (reqRole === 'tenant' && String(tenantId) !== String(reqUserId)) {
+        return res.status(403).json({ detail: "Access denied. You can only update your own profile." });
+    }
 
     if (!name || !email || !phoneNumber) {
         return res.status(400).json({ detail: "Name, email, and phoneNumber are required." });
+    }
+
+    if (password && !validatePassword(password)) {
+        return res.status(400).json({ detail: "Password must be exactly 8 characters long and contain at least one uppercase letter, one lowercase letter, and one numeric digit." });
     }
 
     try {
@@ -128,6 +163,12 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     const locale = localizations.getLocaleFromHeader(req.headers['accept-language']);
     const tenantId = req.params.id;
+    const reqRole = req.headers['x-user-role'];
+    const reqUserId = req.headers['x-user-id'];
+
+    if (reqRole === 'tenant' && String(tenantId) !== String(reqUserId)) {
+        return res.status(403).json({ detail: "Access denied. You can only delete your own account." });
+    }
 
     try {
         const aptCount = await db.fetchOne("SELECT COUNT(*) AS total FROM apartment WHERE tenantId = ?", [tenantId]);

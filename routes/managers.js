@@ -9,6 +9,15 @@ function sha256Hash(data) {
     return crypto.createHash('sha256').update(data).digest('hex');
 }
 
+function validatePassword(password) {
+    if (typeof password !== 'string') return false;
+    if (password.length !== 8) return false;
+    if (!/[A-Z]/.test(password)) return false;
+    if (!/[a-z]/.test(password)) return false;
+    if (!/[0-9]/.test(password)) return false;
+    return true;
+}
+
 // GET /api/managers
 router.get('/', async (req, res) => {
     const locale = localizations.getLocaleFromHeader(req.headers['accept-language']);
@@ -55,6 +64,10 @@ router.post('/', async (req, res) => {
         return res.status(400).json({ detail: "Name, email, password, and phoneNumber are required." });
     }
 
+    if (!validatePassword(password)) {
+        return res.status(400).json({ detail: "Password must be exactly 8 characters long and contain at least one uppercase letter, one lowercase letter, and one numeric digit." });
+    }
+
     try {
         const exists = await db.fetchOne("SELECT 1 as val FROM manager WHERE email = ?", [email]);
         if (exists) {
@@ -85,6 +98,10 @@ router.put('/:id', async (req, res) => {
 
     if (!name || !email || !phoneNumber) {
         return res.status(400).json({ detail: "Name, email, and phoneNumber are required." });
+    }
+
+    if (password && !validatePassword(password)) {
+        return res.status(400).json({ detail: "Password must be exactly 8 characters long and contain at least one uppercase letter, one lowercase letter, and one numeric digit." });
     }
 
     try {

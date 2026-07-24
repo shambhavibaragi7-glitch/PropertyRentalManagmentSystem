@@ -1,6 +1,6 @@
 // STATE MANAGEMENT
 let state = {
-    locale: localStorage.getItem('locale') || 'en',
+    locale: 'en',
     theme: localStorage.getItem('theme') || 'dark',
     user: JSON.parse(localStorage.getItem('user')) || null,
     role: localStorage.getItem('role') || null, // 'owner', 'manager', 'tenant'
@@ -8,7 +8,7 @@ let state = {
     loginRole: 'tenant',
     registerRole: 'tenant',
     activeDashTabs: {
-        owner: 'managersTab',
+        owner: 'apartmentsTab',
         manager: 'buildingsTab',
         tenant: 'searchTab'
     },
@@ -39,6 +39,8 @@ const translations = {
         "logout": "Logout",
         "buildings": "Buildings",
         "apartments": "Apartments",
+        "properties": "Properties",
+        "browse_properties": "Browse Properties",
         "tenants": "Tenants",
         "managers": "Property Managers",
         "messages": "Messages",
@@ -96,6 +98,7 @@ const translations = {
         "logout": "Déconnexion",
         "buildings": "Bâtiments",
         "apartments": "Appartements",
+        "browse_properties": "Parcourir les Propriétés",
         "tenants": "Locataires",
         "managers": "Gestionnaires de Propriété",
         "messages": "Messages",
@@ -153,6 +156,7 @@ const translations = {
         "logout": "Đăng xuất",
         "buildings": "Tòa nhà",
         "apartments": "Căn hộ",
+        "browse_properties": "Duyệt Bất Động Sản",
         "tenants": "Người thuê",
         "managers": "Quản lý Bất động sản",
         "messages": "Tin nhắn",
@@ -210,6 +214,8 @@ const translations = {
         "logout": "Cerrar sesión",
         "buildings": "Edificios",
         "apartments": "Apartamentos",
+        "properties": "Propiedades",
+        "browse_properties": "Buscar Propiedades",
         "tenants": "Inquilinos",
         "managers": "Administradores de la Propiedad",
         "messages": "Mensajes",
@@ -249,6 +255,64 @@ const translations = {
         "land_plots": "Terrenos y Parcelas",
         "land_plots_desc": "Terrenos Residenciales, Comerciales, Tierras Agrícolas",
         "land_plots_coming": "¡La función de Terrenos y Parcelas estará disponible próximamente!"
+    },
+    "hi": {
+        "welcome": "RentArena जीरो ब्रोकरेज रेंटल में आपका स्वागत है",
+        "tagline": "दलाल को छोड़ें। शून्य ब्रोकरेज शुल्क के साथ सीधे मालिक की संपत्तियों को किराए पर लें।",
+        "occupancy_rate_title": "अधिभोग और किराया विश्लेषण",
+        "total_apartments": "कुल अपार्टमेंट",
+        "occupied_apartments": "भरे हुए अपार्टमेंट",
+        "vacant_apartments": "खाली अपार्टमेंट",
+        "occupancy_rate": "अधिभोग दर",
+        "owner_login": "मालिक लॉगिन",
+        "manager_login": "संपत्ति प्रबंधक लॉगिन",
+        "tenant_login": "किराएदार लॉगिन",
+        "owner_reg": "मालिक पंजीकरण",
+        "tenant_reg": "किराएदार पंजीकरण",
+        "dashboard": "डैशबोर्ड",
+        "logout": "लॉगआउट",
+        "buildings": "इमारतें",
+        "apartments": "अपार्टमेंट",
+        "browse_properties": "संपत्तियां ब्राउज़ करें",
+        "tenants": "किराएदार",
+        "managers": "संपत्ति प्रबंधक",
+        "messages": "संदेश",
+        "events": "घटनाक्रम",
+        "appointments": "अपॉइंटमेंट",
+        "profile": "प्रोफ़ाइल",
+        "actions": "कार्रवाइयाँ",
+        "edit": "संपादित करें",
+        "delete": "हटाएं",
+        "create": "बनाएं",
+        "save": "सहेजें",
+        "cancel": "रद्द करें",
+        "loading": "लोड हो रहा है...",
+        "no_records": "कोई रिकॉर्ड नहीं मिला।",
+        "email": "ईमेल",
+        "password": "पासवर्ड",
+        "phone": "फ़ोन नंबर",
+        "name": "नाम",
+        "address": "पता",
+        "city": "शहर",
+        "province": "राज्य",
+        "postal_code": "पिन कोड",
+        "price": "किराया",
+        "rooms": "कमरे",
+        "status": "स्थिति",
+        "description": "विवरण",
+        "date": "दिनांक",
+        "apartment_card_desc": "सीधे मालिक के अपार्टमेंट ब्राउज़ करें और खोजें।",
+        "apartments_flats": "Apartments & Flats",
+        "apartments_flats_desc": "1BHK, 2BHK, 3BHK, Studio Apartments",
+        "independent_houses": "Independent Houses & Villas",
+        "independent_houses_desc": "Villas, Duplexes, Row Houses, Independent Homes",
+        "independent_houses_coming": "स्वतंत्र घर और विला सुविधा जल्द ही आ रही है!",
+        "commercial_properties": "Commercial Properties",
+        "commercial_properties_desc": "Offices, Shops, Showrooms, Co-working Spaces",
+        "commercial_properties_coming": "व्यावसायिक संपत्तियां सुविधा जल्द ही आ रही है!",
+        "land_plots": "Land & Plots",
+        "land_plots_desc": "Residential Plots, Commercial Plots, Agricultural Land",
+        "land_plots_coming": "भूमि और प्लॉट सुविधा जल्द ही आ रही है!"
     }
 };
 
@@ -264,21 +328,10 @@ document.addEventListener('DOMContentLoaded', () => {
 function initApp() {
     if (state.user && state.role) {
         setLoggedInUI(true);
-        if (state.role === 'owner') {
-            switchView('viewOwnerDashboard');
-            loadOwnerDashboard();
-        } else if (state.role === 'manager') {
-            switchView('viewManagerDashboard');
-            loadManagerDashboard();
-        } else if (state.role === 'tenant') {
-            switchView('viewTenantDashboard');
-            loadTenantDashboard();
-        }
     } else {
         setLoggedInUI(false);
-        switchView('viewHome');
-        loadHome();
     }
+    handleRouting();
 }
 
 // SETUP DOM EVENTS
@@ -291,7 +344,6 @@ function setupEventListeners() {
     langSelect.value = state.locale;
     langSelect.addEventListener('change', (e) => {
         state.locale = e.target.value;
-        localStorage.setItem('locale', state.locale);
         applyLocale();
         loadHome();
         if (state.user) {
@@ -310,6 +362,9 @@ function setupEventListeners() {
     // Logout button
     document.getElementById('logoutBtn').addEventListener('click', logout);
 
+    // Hash routing change
+    window.addEventListener('hashchange', handleRouting);
+
     // Mouse movement radial glow on premium glassmorphic cards
     document.addEventListener('mousemove', (e) => {
         const cards = document.querySelectorAll('.glass-premium');
@@ -325,11 +380,19 @@ function setupEventListeners() {
     // Search events
     document.getElementById('homeSearchBtn').addEventListener('click', () => {
         loadHome(document.getElementById('homeSearchInput').value);
+        const el = document.getElementById('homeApartmentsList');
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+        }
     });
 
     document.getElementById('homeSearchInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             loadHome(e.target.value);
+            const el = document.getElementById('homeApartmentsList');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+            }
         }
     });
 
@@ -362,7 +425,34 @@ function setupEventListeners() {
 }
 
 // SWITCH VIEWS
-function switchView(viewId) {
+let isRouting = false;
+
+function getDashboardViewByRole(role) {
+    if (role === 'owner') return 'viewOwnerDashboard';
+    if (role === 'manager') return 'viewManagerDashboard';
+    if (role === 'tenant') return 'viewTenantDashboard';
+    return 'viewHome';
+}
+
+function switchView(viewId, force = false) {
+    if (!force) {
+        if (viewId === 'viewOwnerDashboard' && state.role !== 'owner') {
+            showToast('Unauthorized access to Owner Dashboard.', 'error');
+            switchView(getDashboardViewByRole(state.role), true);
+            return;
+        }
+        if (viewId === 'viewManagerDashboard' && state.role !== 'manager') {
+            showToast('Unauthorized access to Manager Dashboard.', 'error');
+            switchView(getDashboardViewByRole(state.role), true);
+            return;
+        }
+        if (viewId === 'viewTenantDashboard' && state.role !== 'tenant') {
+            showToast('Unauthorized access to Tenant Dashboard.', 'error');
+            switchView(getDashboardViewByRole(state.role), true);
+            return;
+        }
+    }
+
     document.querySelectorAll('.view-section').forEach(section => {
         section.classList.add('hidden');
         section.classList.remove('active');
@@ -372,8 +462,46 @@ function switchView(viewId) {
         activeSection.classList.remove('hidden');
         activeSection.classList.add('active');
         state.activeView = viewId;
+        
+        // Update URL hash to reflect the view, without triggering hashchange loop
+        isRouting = true;
+        window.location.hash = viewId;
+        isRouting = false;
+
+        // Automatically trigger data loaders
+        if (viewId === 'viewOwnerDashboard') {
+            loadOwnerDashboard();
+        } else if (viewId === 'viewManagerDashboard') {
+            loadManagerDashboard();
+        } else if (viewId === 'viewTenantDashboard') {
+            loadTenantDashboard();
+        } else if (viewId === 'viewHome') {
+            loadHome();
+        }
     }
     updateNavbarMenu();
+}
+
+function handleRouting() {
+    if (isRouting) return;
+    const hash = window.location.hash.replace('#', '');
+    if (!hash) {
+        if (state.user && state.role) {
+            switchView(getDashboardViewByRole(state.role));
+        } else {
+            switchView('viewHome');
+        }
+        return;
+    }
+    
+    if (hash === state.activeView) return;
+    
+    const section = document.getElementById(hash);
+    if (section && section.classList.contains('view-section')) {
+        switchView(hash);
+    } else {
+        switchView('viewHome');
+    }
 }
 
 function navigateToApartments() {
@@ -391,8 +519,22 @@ function navigateToApartments() {
 let currentCategory = '';
 
 function openCategoryExplore(categoryKey) {
+    const backView = state.activeView;
     currentCategory = categoryKey;
     switchView('viewCategoryExplore');
+
+    const backBtn = document.getElementById('categoryExploreBackBtn');
+    if (backBtn) {
+        if (backView === 'viewTenantDashboard') {
+            backBtn.innerHTML = `<span>&larr;</span> Back to Dashboard`;
+            backBtn.removeAttribute('onclick');
+            backBtn.onclick = () => switchView('viewTenantDashboard');
+        } else {
+            backBtn.innerHTML = `<span>&larr;</span> Back to Home`;
+            backBtn.removeAttribute('onclick');
+            backBtn.onclick = () => switchView('viewHome');
+        }
+    }
     
     // Reset filters
     document.getElementById('categorySearchInput').value = '';
@@ -441,6 +583,7 @@ function openCategoryExplore(categoryKey) {
 
 function getBuildingImage(item) {
     if (!item) return 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80';
+    if (item.image) return item.image;
     
     let subtype = (item.subtype || '').toLowerCase();
     let title = (item.title || '').toLowerCase();
@@ -520,11 +663,13 @@ async function loadCategoryProperties() {
             
             // Map and add some metadata/subtype to make it fit perfectly
             items = rawApts.map(apt => {
-                let inferredSubtype = "Studio Apartments";
-                if (apt.nbRooms === 1) inferredSubtype = "1 BHK";
-                else if (apt.nbRooms === 2) inferredSubtype = "2 BHK";
-                else if (apt.nbRooms === 3) inferredSubtype = "3 BHK";
-                else if (apt.nbRooms > 3 || apt.price > 2500) inferredSubtype = "Premium Apartments";
+                let inferredSubtype = apt.subtype || "Studio Apartments";
+                if (!apt.subtype) {
+                    if (apt.nbRooms === 1) inferredSubtype = "1 BHK";
+                    else if (apt.nbRooms === 2) inferredSubtype = "2 BHK";
+                    else if (apt.nbRooms === 3) inferredSubtype = "3 BHK";
+                    else if (apt.nbRooms > 3 || apt.price > 2500) inferredSubtype = "Premium Apartments";
+                }
                 
                 return {
                     id: apt.apartmentId,
@@ -613,7 +758,7 @@ async function loadCategoryProperties() {
 function showMockPropertyDetails(item) {
     let footerHtml = '';
     if (!state.user) {
-        footerHtml = `<p class="alert-p">Please <a href="#" onclick="closeModal(); switchView('viewLogin'); setLoginRole('tenant');">log in as a Tenant</a> to inquire.</p>`;
+        footerHtml = `<p class="alert-p">Please <a href="#" onclick="event.preventDefault(); closeModal(); switchView('viewLogin'); setLoginRole('tenant');">log in as a Tenant</a> to inquire.</p>`;
     } else if (state.role === 'tenant') {
         footerHtml = `<button class="btn btn-primary" onclick="closeModal(); showToast('Inquiry sent for ${item.title}!', 'success')">Send Inquiry</button>`;
     }
@@ -926,7 +1071,7 @@ async function handleVerifyOtp(flowType) {
             setLoggedInUI(true);
             
             showStandardFlow();
-            initApp();
+            window.location.hash = getDashboardViewByRole(state.role);
         } else {
             await apiCall('/api/auth/verify-otp', 'POST', requestBody);
             clearInterval(otpInterval);
@@ -948,8 +1093,9 @@ async function handleResetPassword() {
     const newPwd = document.getElementById('forgotNewPassword').value;
     const confirmPwd = document.getElementById('forgotConfirmPassword').value;
     
-    if (!newPwd || newPwd.length < 8) {
-        showToast('New password must be at least 8 characters long.', 'error');
+    const validationError = validatePassword(newPwd);
+    if (validationError) {
+        showToast(validationError, 'error');
         return;
     }
     if (newPwd !== confirmPwd) {
@@ -1039,17 +1185,15 @@ function setLoginRole(role) {
         document.getElementById('loginRegNum').required = false;
     }
     
-    if (role === 'tenant') {
-        extraLinks.style.display = 'none';
-        extraLinks.classList.add('hidden');
-    } else {
-        extraLinks.style.display = 'flex';
-        extraLinks.classList.remove('hidden');
-    }
+    // Always show Login with OTP / Forgot Password links for both tenant and owner
+    extraLinks.style.display = 'flex';
+    extraLinks.classList.remove('hidden');
 
     const footer = document.getElementById('loginFooter');
     if (role === 'tenant') {
-        footer.innerHTML = `<span>Don't have a Tenant account?</span> <a href="#" onclick="switchView('viewRegister')">${translate('tenant_reg')}</a>`;
+        footer.innerHTML = `<span>Don't have a Tenant account?</span> <a href="#" onclick="event.preventDefault(); switchView('viewRegister'); setRegisterRole('tenant');">${translate('tenant_reg')}</a>`;
+    } else if (role === 'owner') {
+        footer.innerHTML = `<span>Don't have an Owner account?</span> <a href="#" onclick="event.preventDefault(); switchView('viewRegister'); setRegisterRole('owner');">${translate('owner_reg')}</a>`;
     } else {
         footer.innerHTML = ``;
     }
@@ -1102,14 +1246,14 @@ function updateNavbarMenu() {
 
     if (!state.user) {
         navMenu.innerHTML = `
-            <li><a href="#" onclick="switchView('viewHome')" class="${state.activeView === 'viewHome' ? 'active' : ''}">Home</a></li>
-            <li><a href="#" onclick="switchView('viewLogin'); setLoginRole('tenant');" class="${state.activeView === 'viewLogin' && state.loginRole === 'tenant' ? 'active' : ''}">${translate('tenant_login')}</a></li>
-            <li><a href="#" onclick="switchView('viewLogin'); setLoginRole('owner');" class="${state.activeView === 'viewLogin' && state.loginRole === 'owner' ? 'active' : ''}">${translate('owner_login')}</a></li>
+            <li><a href="#" onclick="event.preventDefault(); switchView('viewHome')" class="${state.activeView === 'viewHome' ? 'active' : ''}">Home</a></li>
+            <li><a href="#" onclick="event.preventDefault(); switchView('viewLogin'); setLoginRole('tenant');" class="${state.activeView === 'viewLogin' && state.loginRole === 'tenant' ? 'active' : ''}">${translate('tenant_login')}</a></li>
+            <li><a href="#" onclick="event.preventDefault(); switchView('viewLogin'); setLoginRole('owner');" class="${state.activeView === 'viewLogin' && state.loginRole === 'owner' ? 'active' : ''}">${translate('owner_login')}</a></li>
         `;
     } else {
         const capRole = capitalize(state.role);
         navMenu.innerHTML = `
-            <li><a href="#" onclick="switchView('view${capRole}Dashboard')" class="active">${translate('dashboard')}</a></li>
+            <li><a href="#" onclick="event.preventDefault(); switchView('view${capRole}Dashboard')" class="active">${translate('dashboard')}</a></li>
         `;
     }
 }
@@ -1153,6 +1297,11 @@ async function apiCall(endpoint, method = 'GET', body = null) {
         'Accept-Language': state.locale,
         'Content-Type': 'application/json'
     };
+    if (state.user) {
+        const userId = state.user.tenantId || state.user.ownerId || state.user.managerId;
+        if (userId) headers['X-User-Id'] = String(userId);
+        if (state.role) headers['X-User-Role'] = String(state.role);
+    }
     const options = { method, headers };
     if (body) {
         options.body = JSON.stringify(body);
@@ -1213,10 +1362,7 @@ async function handleLogin(e) {
         showToast('Login successful!');
         setLoggedInUI(true);
         
-        // Reset forms
-        document.getElementById('loginForm').reset();
-        
-        initApp();
+        window.location.hash = getDashboardViewByRole(state.role);
     } catch(e) {}
 }
 
@@ -1227,6 +1373,12 @@ async function handleRegister(e) {
     const password = document.getElementById('regPassword').value;
     const phoneNumber = document.getElementById('regPhone').value;
 
+    const validationError = validatePassword(password);
+    if (validationError) {
+        showToast(validationError, 'error');
+        return;
+    }
+
     try {
         await apiCall(`/api/auth/register/${state.registerRole}`, 'POST', {
             name, email, password, phoneNumber
@@ -1236,6 +1388,23 @@ async function handleRegister(e) {
         switchView('viewLogin');
         setLoginRole(state.registerRole);
     } catch(e) {}
+}
+
+function validatePassword(password) {
+    if (!password) return "Password is required.";
+    if (password.length !== 8) {
+        return "Password must be exactly 8 characters long.";
+    }
+    if (!/[A-Z]/.test(password)) {
+        return "Password must contain at least one uppercase letter.";
+    }
+    if (!/[a-z]/.test(password)) {
+        return "Password must contain at least one lowercase letter.";
+    }
+    if (!/[0-9]/.test(password)) {
+        return "Password must contain at least one numeric digit.";
+    }
+    return null; // indicates valid
 }
 
 function logout() {
@@ -1301,7 +1470,8 @@ async function loadHome(search = '') {
             return;
         }
 
-        apts.slice(0, 2).forEach(apt => {
+        const listToShow = search ? apts : apts.slice(0, 2);
+        listToShow.forEach(apt => {
             const cardImgUrl = getBuildingImage(apt);
             const ratingVal = (4.5 + (apt.apartmentId % 5) * 0.1).toFixed(1);
             listContainer.innerHTML += `
@@ -1342,7 +1512,7 @@ async function showApartmentDetails(apartmentId) {
         
         let footerText = '';
         if (!state.user) {
-            footerText = `<p class="alert-p">Please <a href="#" onclick="closeModal(); switchView('viewLogin'); setLoginRole('tenant');">log in as a Tenant</a> to book an appointment.</p>`;
+            footerText = `<p class="alert-p">Please <a href="#" onclick="event.preventDefault(); closeModal(); switchView('viewLogin'); setLoginRole('tenant');">log in as a Tenant</a> to book an appointment.</p>`;
         } else if (state.role === 'tenant') {
             footerText = `<button class="btn btn-primary" onclick="closeModal(); openCreateAppointmentModal(${apt.managerId})">Book Appointment</button>`;
         }
@@ -1350,7 +1520,28 @@ async function showApartmentDetails(apartmentId) {
         const rating = (4.5 + (apartmentId % 5) * 0.1).toFixed(1);
         const reviewsCount = 10 + (apartmentId % 12) * 8;
 
+        let imageHtml = '';
+        if (apt.image) {
+            imageHtml = `
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <img src="${apt.image}" style="max-width: 100%; max-height: 250px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                </div>
+            `;
+        }
+
+        let descriptionHtml = '';
+        if (apt.description) {
+            descriptionHtml = `
+                <hr>
+                <div class="detail-row" style="flex-direction: column; align-items: flex-start;">
+                    <strong>Details & Amenities:</strong>
+                    <p style="margin-top: 5px; color: var(--text-muted); font-size: 0.95rem; line-height: 1.4; text-align: left; width: 100%; white-space: pre-wrap;">${apt.description}</p>
+                </div>
+            `;
+        }
+
         const bodyHtml = `
+            ${imageHtml}
             <div class="detail-row"><strong>Rating & Reviews:</strong> <span style="color:#f59e0b; font-weight:700;">⭐ ${rating} <span style="color:var(--text-muted); font-weight:500; font-size:0.9rem; margin-left:3px;">(${reviewsCount} reviews)</span></span></div>
             <div class="detail-row"><strong>Apartment No:</strong> <span>${apt.apartmentNo}</span></div>
             <div class="detail-row"><strong>Rooms:</strong> <span>${apt.nbRooms}</span></div>
@@ -1360,6 +1551,11 @@ async function showApartmentDetails(apartmentId) {
             <div class="detail-row"><strong>Building Address:</strong> <span>${apt.buildingAddress}</span></div>
             <div class="detail-row"><strong>City/Province:</strong> <span>${apt.buildingCity}, ${apt.buildingProvince}</span></div>
             <div class="detail-row"><strong>Postal Code:</strong> <span>${apt.buildingPostalCode}</span></div>
+            <hr>
+            <div class="detail-row"><strong>Owner Name:</strong> <span>${apt.ownerName || 'N/A'}</span></div>
+            <div class="detail-row"><strong>Owner Phone:</strong> <span>${apt.ownerPhone || 'N/A'}</span></div>
+            <div class="detail-row"><strong>Owner Email:</strong> <span>${apt.ownerEmail || 'N/A'}</span></div>
+            ${descriptionHtml}
             <hr>
             ${footerText}
         `;
@@ -1383,6 +1579,7 @@ function loadOwnerDashboard() {
     loadOwnerApartments();
     loadOwnerMessages();
     loadOwnerEvents();
+    loadOwnerAppointments();
 }
 
 async function loadOwnerManagers() {
@@ -1471,10 +1668,317 @@ async function loadOwnerApartments() {
                     <td>₹${a.price}</td>
                     <td><span class="status-badge ${a.status.toLowerCase()}">${a.status}</span></td>
                     <td>${a.tenantName || 'None'}</td>
+                    <td>
+                        <button class="btn btn-outline btn-small" onclick="openEditPropertyModal(${a.apartmentId})">Edit</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteProperty(${a.apartmentId})">Delete</button>
+                    </td>
                 </tr>
             `;
         });
     } catch(e) {}
+}
+
+async function openCreatePropertyModal() {
+    let tenantOptions = `<option value="">None (Available)</option>`;
+    try {
+        const response = await apiCall('/api/tenants');
+        response.data.forEach(t => {
+            tenantOptions += `<option value="${t.tenantId}">${t.name} (${t.email})</option>`;
+        });
+    } catch(e) {}
+
+    const bodyHtml = `
+        <form id="createPropertyForm" class="auth-form">
+            <div class="form-group">
+                <label>Property Number / Name</label>
+                <input type="number" id="newPropNo" required min="1" placeholder="e.g. 101">
+            </div>
+            <div class="form-group">
+                <label>Property Type</label>
+                <select id="newPropSubtype" required>
+                    <option value="1 BHK">1 BHK</option>
+                    <option value="2 BHK">2 BHK</option>
+                    <option value="Land">Land</option>
+                    <option value="Villa">Villa</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Number of Rooms</label>
+                <input type="number" id="newPropRooms" required min="0" max="15" value="1">
+            </div>
+            <div class="form-group">
+                <label>Monthly Price (₹)</label>
+                <input type="number" id="newPropPrice" required step="0.01" min="1" value="15000">
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="newPropStatus">
+                    <option value="Available">Available</option>
+                    <option value="Occupied">Occupied</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Property Address</label>
+                <input type="text" id="newPropAddress" required placeholder="Enter street address">
+            </div>
+            <div class="form-group">
+                <label>City</label>
+                <input type="text" id="newPropCity" required value="Bangalore">
+            </div>
+            <div class="form-group">
+                <label>Assigned Tenant</label>
+                <select id="newPropTenant">
+                    ${tenantOptions}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Property Description Details</label>
+                <textarea id="newPropDescription" placeholder="Enter details about amenities, floor, layout, etc." class="form-control" style="width:100%; min-height:80px; padding:10px; border-radius:4px; border:1px solid #ccc; background:rgba(255,255,255,0.05); color:#fff;"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Property Photo (Select Local Image File)</label>
+                <input type="file" id="newPropFile" accept="image/*" class="form-control" style="padding: 5px;">
+                <input type="hidden" id="newPropImageBase64">
+                <div id="newPropPreview" style="margin-top:10px; display:none; text-align:center;">
+                    <img id="newPropPreviewImg" src="" style="max-width:100%; max-height:150px; border-radius:4px; border: 1px dashed var(--primary);">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Save Property</button>
+        </form>
+    `;
+    showModal('Create New Property', bodyHtml);
+
+    const typeSelect = document.getElementById('newPropSubtype');
+    const roomsInput = document.getElementById('newPropRooms');
+    typeSelect.addEventListener('change', () => {
+        const type = typeSelect.value;
+        if (type === '1 BHK') roomsInput.value = 1;
+        else if (type === '2 BHK') roomsInput.value = 2;
+        else if (type === 'Land') roomsInput.value = 0;
+        else if (type === 'Villa') roomsInput.value = 4;
+    });
+
+    const fileInput = document.getElementById('newPropFile');
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                document.getElementById('newPropImageBase64').value = evt.target.result;
+                const previewImg = document.getElementById('newPropPreviewImg');
+                previewImg.src = evt.target.result;
+                document.getElementById('newPropPreview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.getElementById('createPropertyForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const tId = document.getElementById('newPropTenant').value;
+        const address = document.getElementById('newPropAddress').value.trim();
+        const city = document.getElementById('newPropCity').value.trim();
+        
+        try {
+            const bldResponse = await apiCall(`/api/buildings?owner_id=${state.user.ownerId}`);
+            let building = bldResponse.data.find(b => b.address.toLowerCase() === address.toLowerCase() && b.city.toLowerCase() === city.toLowerCase());
+            let buildingId;
+            
+            if (building) {
+                buildingId = building.buildingId;
+            } else {
+                const mgrResponse = await apiCall('/api/managers');
+                const managerId = mgrResponse.data[0]?.managerId || 1;
+                
+                await apiCall('/api/buildings', 'POST', {
+                    address,
+                    city,
+                    province: 'Karnataka',
+                    postalCode: '560001',
+                    ownerId: state.user.ownerId,
+                    managerId
+                });
+                
+                const newBldResponse = await apiCall(`/api/buildings?owner_id=${state.user.ownerId}`);
+                const newBld = newBldResponse.data.find(b => b.address.toLowerCase() === address.toLowerCase());
+                buildingId = newBld ? newBld.buildingId : 1;
+            }
+
+            await apiCall('/api/apartments', 'POST', {
+                apartmentNo: parseInt(document.getElementById('newPropNo').value),
+                nbRooms: parseInt(document.getElementById('newPropRooms').value),
+                price: parseFloat(document.getElementById('newPropPrice').value),
+                status: document.getElementById('newPropStatus').value,
+                buildingId: buildingId,
+                tenantId: tId ? parseInt(tId) : null,
+                image: document.getElementById('newPropImageBase64').value || null,
+                description: document.getElementById('newPropDescription').value || null,
+                subtype: document.getElementById('newPropSubtype').value
+            });
+            showToast('Property created successfully.');
+            closeModal();
+            loadOwnerApartments();
+        } catch(err) {}
+    });
+}
+
+async function openEditPropertyModal(id) {
+    try {
+        const response = await apiCall(`/api/apartments/${id}`);
+        const a = response.data;
+        
+        const bldResponse = await apiCall(`/api/buildings/${a.buildingId}`);
+        const bld = bldResponse.data;
+        
+        let tenantOptions = `<option value="">None (Available)</option>`;
+        const tntResponse = await apiCall('/api/tenants');
+        tntResponse.data.forEach(t => {
+            tenantOptions += `<option value="${t.tenantId}" ${t.tenantId === a.tenantId ? 'selected':''}>${t.name} (${t.email})</option>`;
+        });
+
+        const bodyHtml = `
+            <form id="editPropertyForm" class="auth-form">
+                <div class="form-group">
+                    <label>Property Number / Name</label>
+                    <input type="number" id="editPropNo" required min="1" value="${a.apartmentNo}">
+                </div>
+                <div class="form-group">
+                    <label>Property Type</label>
+                    <select id="editPropSubtype" required>
+                        <option value="1 BHK" ${a.subtype === '1 BHK' ? 'selected':''}>1 BHK</option>
+                        <option value="2 BHK" ${a.subtype === '2 BHK' ? 'selected':''}>2 BHK</option>
+                        <option value="Land" ${a.subtype === 'Land' ? 'selected':''}>Land</option>
+                        <option value="Villa" ${a.subtype === 'Villa' ? 'selected':''}>Villa</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Number of Rooms</label>
+                    <input type="number" id="editPropRooms" required min="0" max="15" value="${a.nbRooms}">
+                </div>
+                <div class="form-group">
+                    <label>Monthly Price (₹)</label>
+                    <input type="number" id="editPropPrice" required step="0.01" min="1" value="${a.price}">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="editPropStatus">
+                        <option value="Available" ${a.status === 'Available' ? 'selected' : ''}>Available</option>
+                        <option value="Occupied" ${a.status === 'Occupied' ? 'selected' : ''}>Occupied</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Property Address</label>
+                    <input type="text" id="editPropAddress" required placeholder="Enter street address" value="${bld.address}">
+                </div>
+                <div class="form-group">
+                    <label>City</label>
+                    <input type="text" id="editPropCity" required value="${bld.city}">
+                </div>
+                <div class="form-group">
+                    <label>Assigned Tenant</label>
+                    <select id="editPropTenant">
+                        ${tenantOptions}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Property Description Details</label>
+                    <textarea id="editPropDescription" placeholder="Enter details..." class="form-control" style="width:100%; min-height:80px; padding:10px; border-radius:4px; border:1px solid #ccc; background:rgba(255,255,255,0.05); color:#fff;">${a.description || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Property Photo (Select Local Image File to Replace)</label>
+                    <input type="file" id="editPropFile" accept="image/*" class="form-control" style="padding: 5px;">
+                    <input type="hidden" id="editPropImageBase64" value="${a.image || ''}">
+                    <div id="editPropPreview" style="margin-top:10px; display:${a.image ? 'block' : 'none'}; text-align:center;">
+                        <img id="editPropPreviewImg" src="${a.image || ''}" style="max-width:100%; max-height:150px; border-radius:4px; border: 1px dashed var(--primary);">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+            </form>
+        `;
+        showModal('Edit Property Details', bodyHtml);
+
+        const typeSelect = document.getElementById('editPropSubtype');
+        const roomsInput = document.getElementById('editPropRooms');
+        typeSelect.addEventListener('change', () => {
+            const type = typeSelect.value;
+            if (type === '1 BHK') roomsInput.value = 1;
+            else if (type === '2 BHK') roomsInput.value = 2;
+            else if (type === 'Land') roomsInput.value = 0;
+            else if (type === 'Villa') roomsInput.value = 4;
+        });
+
+        const fileInput = document.getElementById('editPropFile');
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    document.getElementById('editPropImageBase64').value = evt.target.result;
+                    const previewImg = document.getElementById('editPropPreviewImg');
+                    previewImg.src = evt.target.result;
+                    document.getElementById('editPropPreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('editPropertyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const tId = document.getElementById('editPropTenant').value;
+            const address = document.getElementById('editPropAddress').value.trim();
+            const city = document.getElementById('editPropCity').value.trim();
+            
+            try {
+                const bldResponse = await apiCall(`/api/buildings?owner_id=${state.user.ownerId}`);
+                let building = bldResponse.data.find(b => b.address.toLowerCase() === address.toLowerCase() && b.city.toLowerCase() === city.toLowerCase());
+                let buildingId;
+                
+                if (building) {
+                    buildingId = building.buildingId;
+                } else {
+                    const mgrResponse = await apiCall('/api/managers');
+                    const managerId = mgrResponse.data[0]?.managerId || 1;
+                    
+                    await apiCall('/api/buildings', 'POST', {
+                        address,
+                        city,
+                        province: 'Karnataka',
+                        postalCode: '560001',
+                        ownerId: state.user.ownerId,
+                        managerId
+                    });
+                    
+                    const newBldResponse = await apiCall(`/api/buildings?owner_id=${state.user.ownerId}`);
+                    const newBld = newBldResponse.data.find(b => b.address.toLowerCase() === address.toLowerCase());
+                    buildingId = newBld ? newBld.buildingId : 1;
+                }
+
+                await apiCall(`/api/apartments/${id}`, 'PUT', {
+                    apartmentNo: parseInt(document.getElementById('editPropNo').value),
+                    nbRooms: parseInt(document.getElementById('editPropRooms').value),
+                    price: parseFloat(document.getElementById('editPropPrice').value),
+                    status: document.getElementById('editPropStatus').value,
+                    buildingId: buildingId,
+                    tenantId: tId ? parseInt(tId) : null,
+                    image: document.getElementById('editPropImageBase64').value || null,
+                    description: document.getElementById('editPropDescription').value || null,
+                    subtype: document.getElementById('editPropSubtype').value
+                });
+                showToast('Property updated successfully.');
+                closeModal();
+                loadOwnerApartments();
+            } catch(err) {}
+        });
+    } catch (e) {}
+}
+
+async function deleteProperty(id) {
+    if (!confirm('Are you sure you want to delete this property?')) return;
+    try {
+        await apiCall(`/api/apartments/${id}`, 'DELETE');
+        showToast('Property deleted successfully.');
+        loadOwnerApartments();
+    } catch(err) {}
 }
 
 async function loadOwnerMessages() {
@@ -1490,22 +1994,37 @@ async function loadOwnerMessages() {
         }
 
         list.forEach(m => {
-            const replySection = m.responseMessage 
-                ? `<div class="msg-reply"><strong>Reply from ${m.managerName}:</strong> ${m.responseMessage}</div>`
-                : `<div class="reply-pending">Awaiting response...</div>`;
-                
+            const replyForm = `
+                <div class="reply-form-box" style="margin-top: 10px; display: flex; gap: 10px; align-items: center;">
+                    <input type="text" id="replyTenantMsg-${m.messageId}" placeholder="Type reply..." value="${m.responseMessage || ''}" class="form-control" style="flex: 1; padding: 6px 12px; border-radius: 4px; border: 1px solid #ccc; background: rgba(255,255,255,0.05); color: #fff;">
+                    <button class="btn btn-primary btn-small" onclick="replyTenantMessage(${m.messageId})">Reply</button>
+                </div>
+            `;
+            
             container.innerHTML += `
                 <div class="message-card glass">
                     <div class="msg-header">
-                        <span>To: ${m.managerName}</span>
-                        <button class="btn btn-outline btn-small" onclick="deleteMessage('owner', ${m.messageId})">Delete</button>
+                        <span style="font-weight: 600;">From Tenant: ${m.tenantName} (${m.buildingAddress}, Apt ${m.apartmentNo})</span>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">Assigned Manager: ${m.managerName}</span>
                     </div>
-                    <div class="msg-body">${m.message}</div>
-                    ${replySection}
+                    <div class="msg-body" style="margin-top: 10px; font-style: italic;">"${m.message}"</div>
+                    ${replyForm}
                 </div>
             `;
         });
     } catch(e) {}
+}
+
+async function replyTenantMessage(messageId) {
+    const val = document.getElementById(`replyTenantMsg-${messageId}`).value;
+    try {
+        await apiCall(`/api/messages/manager/${messageId}`, 'PUT', {
+            role: 'owner',
+            responseMessage: val
+        });
+        showToast('Reply saved successfully!');
+        loadOwnerMessages();
+    } catch (e) {}
 }
 
 async function loadOwnerEvents() {
@@ -1521,12 +2040,58 @@ async function loadOwnerEvents() {
                     <td>Apt ${e.apartmentNo}</td>
                     <td>${e.buildingAddress}</td>
                     <td>${e.managerName}</td>
-                    <td>${e.description}</td>
+                    <td>
+                        <div>${e.description}</div>
+                        ${e.reply ? `<div style="font-size:0.85em; color:var(--primary); margin-top:4px;"><strong>Reply:</strong> ${e.reply}</div>` : ''}
+                    </td>
                     <td>${e.eventDate}</td>
                     <td><span class="status-badge ${e.status.toLowerCase()}">${e.status}</span></td>
                     <td>
+                        <button class="btn btn-outline btn-small" onclick="replyEvent(${e.eventId})">Reply</button>
                         <button class="btn btn-primary btn-small" onclick="resolveEvent(${e.eventId}, '${e.status}')">Resolve</button>
                     </td>
+                </tr>
+            `;
+        });
+    } catch(e) {}
+}
+
+async function replyEvent(eventId) {
+    const replyText = prompt("Enter your reply to this maintenance event:");
+    if (replyText === null) return;
+    try {
+        await apiCall(`/api/events/${eventId}`, 'PUT', {
+            role: 'owner',
+            reply: replyText.trim()
+        });
+        showToast('Reply saved successfully.');
+        loadOwnerEvents();
+    } catch (e) {}
+}
+
+async function loadOwnerAppointments() {
+    try {
+        const response = await apiCall('/api/appointments');
+        const list = response.data;
+        const tbody = document.querySelector('#ownerAppointmentsTable tbody');
+        tbody.innerHTML = '';
+        
+        list.forEach(a => {
+            const statusClass = a.status === 'accepted' ? 'accepted' : 'pending';
+            const statusText = getStatusLabel(a.status || 'pending');
+            tbody.innerHTML += `
+                <tr>
+                    <td>
+                        <strong>${a.tenantName}</strong>
+                        <div style="font-size: 0.85em; color: var(--text-muted);">
+                            ✉ ${a.tenantEmail || ''}<br>
+                            📞 ${a.tenantPhone || ''}
+                        </div>
+                    </td>
+                    <td>${a.managerName}</td>
+                    <td>${a.appointmentDate}</td>
+                    <td>${a.description}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                 </tr>
             `;
         });
@@ -1601,6 +2166,7 @@ async function loadManagerApartments() {
                     <td>₹${a.price}</td>
                     <td><span class="status-badge ${a.status.toLowerCase()}">${a.status}</span></td>
                     <td>${a.tenantName || 'None'}</td>
+                    <td>${a.subtype || 'Apartment'}</td>
                     <td>
                         <button class="btn btn-outline btn-small" onclick="openEditApartmentModal(${a.apartmentId})">Edit</button>
                         <button class="btn btn-danger btn-small" onclick="deleteApartment(${a.apartmentId})">Delete</button>
@@ -1611,6 +2177,28 @@ async function loadManagerApartments() {
     } catch(e) {}
 }
 
+function getStatusLabel(status) {
+    const statusTranslation = {
+        'en': { 'pending': 'Pending', 'accepted': 'Accepted' },
+        'fr': { 'pending': 'En attente', 'accepted': 'Accepté' },
+        'vi': { 'pending': 'Đang chờ', 'accepted': 'Được chấp nhận' },
+        'es': { 'pending': 'Pendiente', 'accepted': 'Aceptado' },
+        'hi': { 'pending': 'लंबित', 'accepted': 'स्वीकृत' }
+    };
+    const currentLang = state.locale || 'en';
+    return (statusTranslation[currentLang] || statusTranslation['en'])[status] || status;
+}
+
+async function acceptAppointment(id) {
+    try {
+        await apiCall(`/api/appointments/${id}/status`, 'PATCH', { status: 'accepted' });
+        showToast("Appointment accepted successfully.");
+        loadManagerAppointments();
+    } catch (e) {
+        showToast("Failed to accept appointment.", "error");
+    }
+}
+
 async function loadManagerAppointments() {
     try {
         const response = await apiCall(`/api/appointments?manager_id=${state.user.managerId}`);
@@ -1619,6 +2207,12 @@ async function loadManagerAppointments() {
         tbody.innerHTML = '';
         
         list.forEach(a => {
+            const statusClass = a.status === 'accepted' ? 'accepted' : 'pending';
+            const statusText = getStatusLabel(a.status || 'pending');
+            const acceptBtn = a.status === 'pending'
+                ? `<button class="btn btn-primary btn-small" style="margin-right: 5px;" onclick="acceptAppointment(${a.appointmentId})">Accept</button>`
+                : '';
+                
             tbody.innerHTML += `
                 <tr>
                     <td>
@@ -1630,7 +2224,9 @@ async function loadManagerAppointments() {
                     </td>
                     <td>${a.appointmentDate}</td>
                     <td>${a.description}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                     <td>
+                        ${acceptBtn}
                         <button class="btn btn-danger btn-small" onclick="deleteAppointment(${a.appointmentId})">Cancel</button>
                     </td>
                 </tr>
@@ -1640,49 +2236,63 @@ async function loadManagerAppointments() {
 }
 
 async function loadManagerMessages() {
-    // 1. Tenant messages
+    // 1. Tenant messages (Tenant ↔ Manager conversations)
     try {
         const response = await apiCall(`/api/messages/manager?manager_id=${state.user.managerId}`);
         const list = response.data;
         const container = document.getElementById('managerTenantMessages');
         container.innerHTML = '';
         
-        list.forEach(m => {
-            const replyForm = `
-                <div class="reply-form-box">
-                    <input type="text" id="replyTenantMsg-${m.messageId}" placeholder="Type reply..." value="${m.responseMessage || ''}">
-                    <button class="btn btn-primary btn-small" onclick="replyMessage('manager', ${m.messageId}, 'tenant')">Reply</button>
-                </div>
-            `;
-            container.innerHTML += `
-                <div class="message-card glass">
-                    <div class="msg-header">From Tenant: ${m.tenantName}</div>
-                    <div class="msg-body">${m.message}</div>
-                    ${replyForm}
-                </div>
-            `;
-        });
+        if (list.length === 0) {
+            container.innerHTML = `<p>${translate('no_records')}</p>`;
+        } else {
+            list.forEach(m => {
+                container.innerHTML += `
+                    <div class="message-card glass">
+                        <div class="msg-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 8px;">
+                            <span style="font-weight: 600; color: var(--primary);">From: ${m.tenantName}</span>
+                        </div>
+                        <div class="msg-body" style="margin-bottom: 8px;">
+                            <span style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 2px;">Tenant Message:</span>
+                            <div style="font-style: italic;">"${m.message}"</div>
+                        </div>
+                        <div class="msg-reply" style="padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.05);">
+                            <span style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 2px;">Manager Response:</span>
+                            <div>${m.responseMessage ? `"${m.responseMessage}"` : `<span style="color: var(--warning); font-style: italic;">Awaiting response...</span>`}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
     } catch(e) {}
 
-    // 2. Owner messages
+    // 2. Owner messages (Tenant ↔ Owner conversations)
     try {
         const response = await apiCall(`/api/messages/owner?manager_id=${state.user.managerId}`);
         const list = response.data;
         const container = document.getElementById('managerOwnerMessages');
         container.innerHTML = '';
         
+        if (list.length === 0) {
+            container.innerHTML = `<p>${translate('no_records')}</p>`;
+            return;
+        }
+
         list.forEach(m => {
-            const replyForm = `
-                <div class="reply-form-box">
-                    <input type="text" id="replyOwnerMsg-${m.messageId}" placeholder="Type reply..." value="${m.responseMessage || ''}">
-                    <button class="btn btn-primary btn-small" onclick="replyMessage('manager', ${m.messageId}, 'owner')">Reply</button>
-                </div>
-            `;
             container.innerHTML += `
                 <div class="message-card glass">
-                    <div class="msg-header">From Owner: ${m.ownerName}</div>
-                    <div class="msg-body">${m.message}</div>
-                    ${replyForm}
+                    <div class="msg-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 8px;">
+                        <span style="font-weight: 600; color: var(--primary);">${m.tenantName} ↔ ${m.ownerName}</span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">${m.buildingAddress}, Apt ${m.apartmentNo}</span>
+                    </div>
+                    <div class="msg-body" style="margin-bottom: 8px;">
+                        <span style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 2px;">Tenant Message:</span>
+                        <div style="font-style: italic;">"${m.message}"</div>
+                    </div>
+                    <div class="msg-reply" style="padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.05);">
+                        <span style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 2px;">Owner Response:</span>
+                        <div>${m.responseMessage ? `"${m.responseMessage}"` : `<span style="color: var(--warning); font-style: italic;">Awaiting response...</span>`}</div>
+                    </div>
                 </div>
             `;
         });
@@ -1756,7 +2366,7 @@ async function loadTenantApartments(search = '') {
             const isAssigned = apt.tenantId === state.user.tenantId;
             const cardClass = isAssigned ? 'apt-card glass border-active' : 'apt-card glass';
             const actionText = isAssigned ? `<span class="assigned-label">★ Your Rented Apartment</span>` : '';
-            const cardImgUrl = getBuildingImage(apt);
+            const cardImgUrl = apt.image ? apt.image : getBuildingImage(apt);
             
             grid.innerHTML += `
                 <div class="${cardClass}" style="background-image: url('${cardImgUrl}');" onclick="showApartmentDetails(${apt.apartmentId})">
@@ -1789,11 +2399,14 @@ async function loadTenantAppointments() {
         tbody.innerHTML = '';
         
         list.forEach(a => {
+            const statusClass = a.status === 'accepted' ? 'accepted' : 'pending';
+            const statusText = getStatusLabel(a.status || 'pending');
             tbody.innerHTML += `
                 <tr>
                     <td>${a.managerName}</td>
                     <td>${a.appointmentDate}</td>
                     <td>${a.description}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                     <td>
                         <button class="btn btn-outline btn-small" onclick="openEditAppointmentModal(${a.appointmentId})">Reschedule</button>
                         <button class="btn btn-danger btn-small" onclick="deleteAppointment(${a.appointmentId})">Cancel</button>
@@ -1822,7 +2435,7 @@ async function loadTenantMessages() {
                         <span>To Manager: ${m.managerName}</span>
                         <div>
                             <button class="btn btn-outline btn-small" onclick="openEditMessageModal(${m.messageId}, '${m.message.replace(/'/g, "\\'")}')">Edit</button>
-                            <button class="btn btn-danger btn-small" onclick="deleteMessage('tenant', ${m.messageId})">Delete</button>
+                            <button class="btn btn-danger btn-small" onclick="deleteMessage('manager', ${m.messageId})">Delete</button>
                         </div>
                     </div>
                     <div class="msg-body">${m.message}</div>
@@ -1845,6 +2458,11 @@ async function handleProfileUpdate(e, role) {
 
     const payload = { name, email, phoneNumber };
     if (password) {
+        const validationError = validatePassword(password);
+        if (validationError) {
+            showToast(validationError, 'error');
+            return;
+        }
         payload.password = password;
     }
 
@@ -1913,11 +2531,17 @@ async function openCreateModal(type) {
         
         document.getElementById('createManagerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const password = document.getElementById('newMgrPwd').value;
+            const validationError = validatePassword(password);
+            if (validationError) {
+                showToast(validationError, 'error');
+                return;
+            }
             try {
                 await apiCall('/api/managers', 'POST', {
                     name: document.getElementById('newMgrName').value,
                     email: document.getElementById('newMgrEmail').value,
-                    password: document.getElementById('newMgrPwd').value,
+                    password,
                     phoneNumber: document.getElementById('newMgrPhone').value
                 });
                 showToast('Manager created successfully.');
@@ -1955,10 +2579,16 @@ async function openEditManagerModal(id) {
             </form>
         `;
         showModal('Edit Manager Details', bodyHtml);
-        
-        document.getElementById('editManagerForm').addEventListener('submit', async (e) => {
+                document.getElementById('editManagerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const pwd = document.getElementById('editMgrPwd').value;
+            if (pwd) {
+                const validationError = validatePassword(pwd);
+                if (validationError) {
+                    showToast(validationError, 'error');
+                    return;
+                }
+            }
             const payload = {
                 name: document.getElementById('editMgrName').value,
                 email: document.getElementById('editMgrEmail').value,
@@ -2017,6 +2647,13 @@ async function openEditTenantModal(id) {
         document.getElementById('editTenantForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const pwd = document.getElementById('editTntPwd').value;
+            if (pwd) {
+                const validationError = validatePassword(pwd);
+                if (validationError) {
+                    showToast(validationError, 'error');
+                    return;
+                }
+            }
             const payload = {
                 name: document.getElementById('editTntName').value,
                 email: document.getElementById('editTntEmail').value,
@@ -2031,6 +2668,7 @@ async function openEditTenantModal(id) {
                 loadOwnerTenants();
             } catch(err) {}
         });
+        
     } catch(e) {}
 }
 
@@ -2180,14 +2818,6 @@ async function deleteBuilding(id) {
 
 // --- APARTMENTS CRUD (by MANAGER) ---
 async function openCreateApartmentModal() {
-    let buildingOptions = '';
-    try {
-        const response = await apiCall(`/api/buildings?manager_id=${state.user.managerId}`);
-        response.data.forEach(b => {
-            buildingOptions += `<option value="${b.buildingId}">${b.address}, ${b.city}</option>`;
-        });
-    } catch(e) {}
-    
     let tenantOptions = `<option value="">None (Available)</option>`;
     try {
         const response = await apiCall('/api/tenants');
@@ -2199,16 +2829,25 @@ async function openCreateApartmentModal() {
     const bodyHtml = `
         <form id="createApartmentForm" class="auth-form">
             <div class="form-group">
-                <label>Apartment Number</label>
-                <input type="number" id="newAptNo" required min="1">
+                <label>Property Number / Name</label>
+                <input type="number" id="newAptNo" required min="1" placeholder="e.g. 101">
+            </div>
+            <div class="form-group">
+                <label>Property Type</label>
+                <select id="newAptSubtype" required>
+                    <option value="1 BHK">1 BHK</option>
+                    <option value="2 BHK">2 BHK</option>
+                    <option value="Land">Land</option>
+                    <option value="Villa">Villa</option>
+                </select>
             </div>
             <div class="form-group">
                 <label>Number of Rooms</label>
-                <input type="number" id="newAptRooms" required min="1" max="10" value="2">
+                <input type="number" id="newAptRooms" required min="0" max="15" value="1">
             </div>
             <div class="form-group">
                 <label>Monthly Price (₹)</label>
-                <input type="number" id="newAptPrice" required step="0.01" min="1" value="83000">
+                <input type="number" id="newAptPrice" required step="0.01" min="1" value="15000">
             </div>
             <div class="form-group">
                 <label>Status</label>
@@ -2218,10 +2857,16 @@ async function openCreateApartmentModal() {
                 </select>
             </div>
             <div class="form-group">
-                <label>Building</label>
-                <select id="newAptBuilding" required>
-                    ${buildingOptions}
-                </select>
+                <label>Property Address</label>
+                <input type="text" id="newAptAddress" required placeholder="Enter street address">
+            </div>
+            <div class="form-group">
+                <label>City</label>
+                <input type="text" id="newAptCity" required value="Bangalore">
+            </div>
+            <div class="form-group">
+                <label>Owner ID (Reference ID)</label>
+                <input type="number" id="newAptOwner" value="1" required min="1">
             </div>
             <div class="form-group">
                 <label>Assigned Tenant</label>
@@ -2229,24 +2874,89 @@ async function openCreateApartmentModal() {
                     ${tenantOptions}
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary btn-block">Save Apartment</button>
+            <div class="form-group">
+                <label>Property Description Details</label>
+                <textarea id="newAptDescription" placeholder="Enter details about amenities, floor, layout, etc." class="form-control" style="width:100%; min-height:80px; padding:10px; border-radius:4px; border:1px solid #ccc; background:rgba(255,255,255,0.05); color:#fff;"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Property Photo (Select Local Image File)</label>
+                <input type="file" id="newAptFile" accept="image/*" class="form-control" style="padding: 5px;">
+                <input type="hidden" id="newAptImageBase64">
+                <div id="newAptPreview" style="margin-top:10px; display:none; text-align:center;">
+                    <img id="newAptPreviewImg" src="" style="max-width:100%; max-height:150px; border-radius:4px; border: 1px dashed var(--primary);">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Save Property</button>
         </form>
     `;
-    showModal('Create New Apartment', bodyHtml);
+    showModal('Create New Property', bodyHtml);
+
+    const typeSelect = document.getElementById('newAptSubtype');
+    const roomsInput = document.getElementById('newAptRooms');
+    typeSelect.addEventListener('change', () => {
+        const type = typeSelect.value;
+        if (type === '1 BHK') roomsInput.value = 1;
+        else if (type === '2 BHK') roomsInput.value = 2;
+        else if (type === 'Land') roomsInput.value = 0;
+        else if (type === 'Villa') roomsInput.value = 4;
+    });
+
+    const fileInput = document.getElementById('newAptFile');
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                document.getElementById('newAptImageBase64').value = evt.target.result;
+                const previewImg = document.getElementById('newAptPreviewImg');
+                previewImg.src = evt.target.result;
+                document.getElementById('newAptPreview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
 
     document.getElementById('createApartmentForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const tId = document.getElementById('newAptTenant').value;
+        const address = document.getElementById('newAptAddress').value.trim();
+        const city = document.getElementById('newAptCity').value.trim();
+        const ownerId = parseInt(document.getElementById('newAptOwner').value);
+        
         try {
+            const bldResponse = await apiCall(`/api/buildings?manager_id=${state.user.managerId}`);
+            let building = bldResponse.data.find(b => b.address.toLowerCase() === address.toLowerCase() && b.city.toLowerCase() === city.toLowerCase() && b.ownerId === ownerId);
+            let buildingId;
+            
+            if (building) {
+                buildingId = building.buildingId;
+            } else {
+                await apiCall('/api/buildings', 'POST', {
+                    address,
+                    city,
+                    province: 'Karnataka',
+                    postalCode: '560001',
+                    ownerId,
+                    managerId: state.user.managerId
+                });
+                
+                const newBldResponse = await apiCall(`/api/buildings?manager_id=${state.user.managerId}`);
+                const newBld = newBldResponse.data.find(b => b.address.toLowerCase() === address.toLowerCase() && b.ownerId === ownerId);
+                buildingId = newBld ? newBld.buildingId : 1;
+            }
+
             await apiCall('/api/apartments', 'POST', {
                 apartmentNo: parseInt(document.getElementById('newAptNo').value),
                 nbRooms: parseInt(document.getElementById('newAptRooms').value),
                 price: parseFloat(document.getElementById('newAptPrice').value),
                 status: document.getElementById('newAptStatus').value,
-                buildingId: parseInt(document.getElementById('newAptBuilding').value),
-                tenantId: tId ? parseInt(tId) : null
+                buildingId: buildingId,
+                tenantId: tId ? parseInt(tId) : null,
+                image: document.getElementById('newAptImageBase64').value || null,
+                description: document.getElementById('newAptDescription').value || null,
+                subtype: document.getElementById('newAptSubtype').value
             });
-            showToast('Apartment created successfully.');
+            showToast('Property created successfully.');
             closeModal();
             loadManagerApartments();
         } catch(err) {}
@@ -2258,11 +2968,8 @@ async function openEditApartmentModal(id) {
         const response = await apiCall(`/api/apartments/${id}`);
         const a = response.data;
         
-        let buildingOptions = '';
-        const bldResponse = await apiCall(`/api/buildings?manager_id=${state.user.managerId}`);
-        bldResponse.data.forEach(b => {
-            buildingOptions += `<option value="${b.buildingId}" ${b.buildingId === a.buildingId ? 'selected':''}>${b.address}, ${b.city}</option>`;
-        });
+        const bldResponse = await apiCall(`/api/buildings/${a.buildingId}`);
+        const bld = bldResponse.data;
         
         let tenantOptions = `<option value="">None (Available)</option>`;
         const tntResponse = await apiCall('/api/tenants');
@@ -2273,29 +2980,44 @@ async function openEditApartmentModal(id) {
         const bodyHtml = `
             <form id="editApartmentForm" class="auth-form">
                 <div class="form-group">
-                    <label>Apartment Number</label>
-                    <input type="number" id="editAptNo" value="${a.apartmentNo}" required min="1">
+                    <label>Property Number / Name</label>
+                    <input type="number" id="editAptNo" required min="1" value="${a.apartmentNo}">
+                </div>
+                <div class="form-group">
+                    <label>Property Type</label>
+                    <select id="editAptSubtype" required>
+                        <option value="1 BHK" ${a.subtype === '1 BHK' ? 'selected':''}>1 BHK</option>
+                        <option value="2 BHK" ${a.subtype === '2 BHK' ? 'selected':''}>2 BHK</option>
+                        <option value="Land" ${a.subtype === 'Land' ? 'selected':''}>Land</option>
+                        <option value="Villa" ${a.subtype === 'Villa' ? 'selected':''}>Villa</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Number of Rooms</label>
-                    <input type="number" id="editAptRooms" value="${a.nbRooms}" required min="1" max="10">
+                    <input type="number" id="editAptRooms" required min="0" max="15" value="${a.nbRooms}">
                 </div>
                 <div class="form-group">
                     <label>Monthly Price (₹)</label>
-                    <input type="number" id="editAptPrice" value="${a.price}" required step="0.01" min="1">
+                    <input type="number" id="editAptPrice" required step="0.01" min="1" value="${a.price}">
                 </div>
                 <div class="form-group">
                     <label>Status</label>
                     <select id="editAptStatus">
-                        <option value="Available" ${a.status === 'Available' ? 'selected':''}>Available</option>
-                        <option value="Occupied" ${a.status === 'Occupied' ? 'selected':''}>Occupied</option>
+                        <option value="Available" ${a.status === 'Available' ? 'selected' : ''}>Available</option>
+                        <option value="Occupied" ${a.status === 'Occupied' ? 'selected' : ''}>Occupied</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Building</label>
-                    <select id="editAptBuilding" required>
-                        ${buildingOptions}
-                    </select>
+                    <label>Property Address</label>
+                    <input type="text" id="editAptAddress" required placeholder="Enter street address" value="${bld.address}">
+                </div>
+                <div class="form-group">
+                    <label>City</label>
+                    <input type="text" id="editAptCity" required value="${bld.city}">
+                </div>
+                <div class="form-group">
+                    <label>Owner ID (Reference ID)</label>
+                    <input type="number" id="editAptOwner" value="${bld.ownerId}" required min="1">
                 </div>
                 <div class="form-group">
                     <label>Assigned Tenant</label>
@@ -2303,29 +3025,94 @@ async function openEditApartmentModal(id) {
                         ${tenantOptions}
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary btn-block">Update Apartment</button>
+                <div class="form-group">
+                    <label>Property Description Details</label>
+                    <textarea id="editAptDescription" placeholder="Enter details..." class="form-control" style="width:100%; min-height:80px; padding:10px; border-radius:4px; border:1px solid #ccc; background:rgba(255,255,255,0.05); color:#fff;">${a.description || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Property Photo (Select Local Image File to Replace)</label>
+                    <input type="file" id="editAptFile" accept="image/*" class="form-control" style="padding: 5px;">
+                    <input type="hidden" id="editAptImageBase64" value="${a.image || ''}">
+                    <div id="editAptPreview" style="margin-top:10px; display:${a.image ? 'block' : 'none'}; text-align:center;">
+                        <img id="editAptPreviewImg" src="${a.image || ''}" style="max-width:100%; max-height:150px; border-radius:4px; border: 1px dashed var(--primary);">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
             </form>
         `;
-        showModal('Edit Apartment', bodyHtml);
+        showModal('Edit Property Details', bodyHtml);
+
+        const typeSelect = document.getElementById('editAptSubtype');
+        const roomsInput = document.getElementById('editAptRooms');
+        typeSelect.addEventListener('change', () => {
+            const type = typeSelect.value;
+            if (type === '1 BHK') roomsInput.value = 1;
+            else if (type === '2 BHK') roomsInput.value = 2;
+            else if (type === 'Land') roomsInput.value = 0;
+            else if (type === 'Villa') roomsInput.value = 4;
+        });
+
+        const fileInput = document.getElementById('editAptFile');
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    document.getElementById('editAptImageBase64').value = evt.target.result;
+                    const previewImg = document.getElementById('editAptPreviewImg');
+                    previewImg.src = evt.target.result;
+                    document.getElementById('editAptPreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
         document.getElementById('editApartmentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const tId = document.getElementById('editAptTenant').value;
+            const address = document.getElementById('editAptAddress').value.trim();
+            const city = document.getElementById('editAptCity').value.trim();
+            const ownerId = parseInt(document.getElementById('editAptOwner').value);
+            
             try {
+                const bldResponse = await apiCall(`/api/buildings?manager_id=${state.user.managerId}`);
+                let building = bldResponse.data.find(b => b.address.toLowerCase() === address.toLowerCase() && b.city.toLowerCase() === city.toLowerCase() && b.ownerId === ownerId);
+                let buildingId;
+                
+                if (building) {
+                    buildingId = building.buildingId;
+                } else {
+                    await apiCall('/api/buildings', 'POST', {
+                        address,
+                        city,
+                        province: 'Karnataka',
+                        postalCode: '560001',
+                        ownerId,
+                        managerId: state.user.managerId
+                    });
+                    
+                    const newBldResponse = await apiCall(`/api/buildings?manager_id=${state.user.managerId}`);
+                    const newBld = newBldResponse.data.find(b => b.address.toLowerCase() === address.toLowerCase() && b.ownerId === ownerId);
+                    buildingId = newBld ? newBld.buildingId : 1;
+                }
+
                 await apiCall(`/api/apartments/${id}`, 'PUT', {
                     apartmentNo: parseInt(document.getElementById('editAptNo').value),
                     nbRooms: parseInt(document.getElementById('editAptRooms').value),
                     price: parseFloat(document.getElementById('editAptPrice').value),
                     status: document.getElementById('editAptStatus').value,
-                    buildingId: parseInt(document.getElementById('editAptBuilding').value),
-                    tenantId: tId ? parseInt(tId) : null
+                    buildingId: buildingId,
+                    tenantId: tId ? parseInt(tId) : null,
+                    image: document.getElementById('editAptImageBase64').value || null,
+                    description: document.getElementById('editAptDescription').value || null,
+                    subtype: document.getElementById('editAptSubtype').value
                 });
-                showToast('Apartment updated successfully.');
+                showToast('Property updated successfully.');
                 closeModal();
                 loadManagerApartments();
             } catch(err) {}
         });
-    } catch(e) {}
+    } catch (e) {}
 }
 
 async function deleteApartment(id) {
@@ -2362,8 +3149,8 @@ async function openCreateAppointmentModal(managerId = null) {
                 </div>
             ` : ''}
             <div class="form-group">
-                <label>Appointment Date & Time</label>
-                <input type="datetime-local" id="apptDate" required>
+                <label>Appointment Date</label>
+                <input type="date" id="apptDate" required>
             </div>
             <div class="form-group">
                 <label>Description / Purpose</label>
@@ -2392,7 +3179,9 @@ async function openCreateAppointmentModal(managerId = null) {
             showToast('Appointment booked successfully!');
             closeModal();
             loadTenantAppointments();
-        } catch(err) {}
+        } catch(err) {
+            showToast(err.message || 'Error booking appointment.');
+        }
     });
 }
 
@@ -2401,18 +3190,18 @@ async function openEditAppointmentModal(id) {
         const response = await apiCall(`/api/appointments/${id}`);
         const appt = response.data;
         
-        // Reformat date from YYYY-MM-DD HH:MM to ISO datetime-local
+        // Reformat date from YYYY-MM-DD to YYYY-MM-DD (extracting date portion)
         let dtStr = '';
         if (appt.appointmentDate) {
-            const rawDt = appt.appointmentDate.replace(' ', 'T');
+            const rawDt = appt.appointmentDate.split(' ')[0].split('T')[0];
             dtStr = rawDt;
         }
 
         const bodyHtml = `
             <form id="editAppointmentForm" class="auth-form">
                 <div class="form-group">
-                    <label>Reschedule Date & Time</label>
-                    <input type="datetime-local" id="editApptDate" value="${dtStr}" required>
+                    <label>Reschedule Date</label>
+                    <input type="date" id="editApptDate" value="${dtStr}" required>
                 </div>
                 <div class="form-group">
                     <label>Description</label>
@@ -2436,9 +3225,13 @@ async function openEditAppointmentModal(id) {
                 closeModal();
                 if (state.role === 'tenant') loadTenantAppointments();
                 if (state.role === 'manager') loadManagerAppointments();
-            } catch(err) {}
+            } catch(err) {
+                showToast(err.message || 'Error rescheduling appointment.');
+            }
         });
-    } catch(e) {}
+    } catch(e) {
+        showToast(e.message || 'Error loading appointment details.');
+    }
 }
 
 async function deleteAppointment(id) {
@@ -2448,7 +3241,9 @@ async function deleteAppointment(id) {
         showToast('Appointment cancelled.');
         if (state.role === 'tenant') loadTenantAppointments();
         if (state.role === 'manager') loadManagerAppointments();
-    } catch(e) {}
+    } catch(e) {
+        showToast(e.message || 'Error cancelling appointment.');
+    }
 }
 
 // --- MESSAGES CRUD ---

@@ -9,6 +9,15 @@ function sha256Hash(data) {
     return crypto.createHash('sha256').update(data).digest('hex');
 }
 
+function validatePassword(password) {
+    if (typeof password !== 'string') return false;
+    if (password.length !== 8) return false;
+    if (!/[A-Z]/.test(password)) return false;
+    if (!/[a-z]/.test(password)) return false;
+    if (!/[0-9]/.test(password)) return false;
+    return true;
+}
+
 // In-memory mock OTP storage
 // Structure: { [identifier]: { otp: '123456', expiresAt: timestamp } }
 const pendingOtps = new Map();
@@ -40,53 +49,17 @@ router.post('/login', async (req, res) => {
                 return res.status(400).json({ detail: "Registration number is required for manager login." });
             }
             user = await db.fetchOne("SELECT * FROM manager WHERE registrationNumber = ?", [registrationNumber]);
-            if (!user) {
-                // Auto-register manager
-                const defaultName = `Manager ${registrationNumber}`;
-                const defaultEmail = `${registrationNumber.toLowerCase().replace(/[^a-z0-9]/g, '')}@manager.com`.slice(0, 50);
-                const defaultPhone = "1234567890";
-                await db.query(
-                    "INSERT INTO manager (name, email, password, phoneNumber, registrationNumber) VALUES (?, ?, ?, ?, ?)",
-                    [defaultName, defaultEmail, hashedPwd, defaultPhone, registrationNumber]
-                );
-                user = await db.fetchOne("SELECT * FROM manager WHERE registrationNumber = ?", [registrationNumber]);
-            } else {
-                // Update/autosave password
-                await db.query(
-                    "UPDATE manager SET password = ? WHERE registrationNumber = ?",
-                    [hashedPwd, registrationNumber]
-                );
-                user.password = hashedPwd;
+            if (!user || user.password !== hashedPwd) {
+                return res.status(401).json({ detail: "Invalid Email or Password" });
             }
         } else {
             if (!email) {
                 return res.status(400).json({ detail: "Email is required for login." });
             }
             user = await db.fetchOne(`SELECT * FROM [${lowerRole}] WHERE email = ?`, [email]);
-            if (!user) {
-                // Auto-register owner or tenant
-                const defaultName = (name && name.trim()) ? name.trim().slice(0, 50) : email.split('@')[0]
-                    .replace(/[^a-zA-Z0-9]/g, ' ')
-                    .replace(/\b\w/g, c => c.toUpperCase())
-                    .slice(0, 50);
-                const defaultPhone = "1234567890";
-                await db.query(
-                    `INSERT INTO [${lowerRole}] (name, email, password, phoneNumber) VALUES (?, ?, ?, ?)`,
-                    [defaultName, email, hashedPwd, defaultPhone]
-                );
-                user = await db.fetchOne(`SELECT * FROM [${lowerRole}] WHERE email = ?`, [email]);
-            } else {
-                // Update/autosave password
-                await db.query(
-                    `UPDATE [${lowerRole}] SET password = ? WHERE email = ?`,
-                    [hashedPwd, email]
-                );
-                user.password = hashedPwd;
+            if (!user || user.password !== hashedPwd) {
+                return res.status(401).json({ detail: "Invalid Email or Password" });
             }
-        }
-
-        if (!user) {
-            return res.status(401).json({ detail: "Authentication failed." });
         }
 
         // Remove password from response
@@ -125,30 +98,12 @@ router.post('/send-otp', async (req, res) => {
         if (isManager) {
             user = await db.fetchOne("SELECT * FROM manager WHERE registrationNumber = ?", [identifier]);
             if (!user) {
-                // Auto-create manager so that OTP login succeeds
-                const defaultName = `Manager ${identifier}`;
-                const defaultEmail = `${identifier.toLowerCase().replace(/[^a-z0-9]/g, '')}@manager.com`.slice(0, 50);
-                const defaultPhone = "1234567890";
-                const dummyPassword = sha256Hash("password123");
-                await db.query(
-                    "INSERT INTO manager (name, email, password, phoneNumber, registrationNumber) VALUES (?, ?, ?, ?, ?)",
-                    [defaultName, defaultEmail, dummyPassword, defaultPhone, identifier]
-                );
+                return res.status(404).json({ detail: "Registration number not found." });
             }
         } else {
             user = await db.fetchOne(`SELECT * FROM [${lowerRole}] WHERE email = ?`, [identifier]);
             if (!user) {
-                // Auto-create owner or tenant
-                const defaultName = identifier.split('@')[0]
-                    .replace(/[^a-zA-Z0-9]/g, ' ')
-                    .replace(/\b\w/g, c => c.toUpperCase())
-                    .slice(0, 50);
-                const defaultPhone = "1234567890";
-                const dummyPassword = sha256Hash("password123");
-                await db.query(
-                    `INSERT INTO [${lowerRole}] (name, email, password, phoneNumber) VALUES (?, ?, ?, ?)`,
-                    [defaultName, identifier, dummyPassword, defaultPhone]
-                );
+                return res.status(404).json({ detail: "Email address not found." });
             }
         }
         
@@ -233,6 +188,10 @@ router.post('/reset-password', async (req, res) => {
         return res.status(400).json({ detail: "Role, OTP, and newPassword are required." });
     }
     
+    if (!validatePassword(newPassword)) {
+        return res.status(400).json({ detail: "Password must be exactly 8 characters long and contain at least one uppercase letter, one lowercase letter, and one numeric digit." });
+    }
+    
     const lowerRole = role.toLowerCase();
     const isManager = (lowerRole === 'manager');
     const identifier = isManager ? registrationNumber : email;
@@ -284,6 +243,10 @@ router.post('/register/owner', async (req, res) => {
         return res.status(400).json({ detail: "Name, email, and password are required." });
     }
 
+    if (!validatePassword(password)) {
+        return res.status(400).json({ detail: "Password must be exactly 8 characters long and contain at least one uppercase letter, one lowercase letter, and one numeric digit." });
+    }
+
     try {
         const exists = await db.fetchOne("SELECT 1 as val FROM owner WHERE email = ?", [email]);
         if (exists) {
@@ -313,6 +276,10 @@ router.post('/register/tenant', async (req, res) => {
 
     if (!name || !email || !password) {
         return res.status(400).json({ detail: "Name, email, and password are required." });
+    }
+
+    if (!validatePassword(password)) {
+        return res.status(400).json({ detail: "Password must be exactly 8 characters long and contain at least one uppercase letter, one lowercase letter, and one numeric digit." });
     }
 
     try {
